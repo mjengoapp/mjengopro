@@ -1,0 +1,434 @@
+require('dotenv').config();
+const express = require('express');
+const session = require('express-session');
+const crypto = require('crypto');
+const axios = require('axios');
+const fs = require('fs');
+const path = require('path');
+
+const app = express();
+const PORT = process.env.PORT || 3000;
+
+// Middleware
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(express.static('public'));
+app.use(session({
+    secret: process.env.SESSION_SECRET || 'your-secret-key',
+    resave: false,
+    saveUninitialized: true,
+    cookie: { 
+        secure: false, 
+        maxAge: 30 * 24 * 60 * 60 * 1000 // 30 days - long term session
+    }
+}));
+
+// Set view engine
+app.set('view engine', 'ejs');
+app.set('views', path.join(__dirname, 'views'));
+
+// Data storage
+const DATA_FILE = path.join(__dirname, 'data', 'users.json');
+
+// Initialize data file with proper structure
+function initializeDataFile() {
+    if (!fs.existsSync(path.join(__dirname, 'data'))) {
+        fs.mkdirSync(path.join(__dirname, 'data'));
+    }
+    if (!fs.existsSync(DATA_FILE)) {
+        fs.writeFileSync(DATA_FILE, JSON.stringify({ 
+            users: [], 
+            transactions: [] 
+        }, null, 2));
+    }
+}
+
+function readData() {
+    try {
+        const data = fs.readFileSync(DATA_FILE, 'utf8');
+        const parsed = JSON.parse(data);
+        if (!parsed.transactions) {
+            parsed.transactions = [];
+        }
+        if (!parsed.users) {
+            parsed.users = [];
+        }
+        return parsed;
+    } catch (error) {
+        return { users: [], transactions: [] };
+    }
+}
+
+function writeData(data) {
+    if (!data.transactions) data.transactions = [];
+    if (!data.users) data.users = [];
+    fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2));
+}
+
+// Initialize the data file
+initializeDataFile();
+
+// ===== ROOT ROUTE - Always load user from file for persistence =====
+app.get('/', (req, res) => {
+    // If user is logged in via session, get fresh data from file
+    let user = null;
+    if (req.session.user && req.session.user.email) {
+        const data = readData();
+        // Find the user in the file (always fresh data)
+        const foundUser = data.users.find(u => u.email === req.session.user.email);
+        if (foundUser) {
+            user = foundUser;
+            // Update session with fresh data
+            req.session.user = user;
+        } else {
+            // User was deleted or doesn't exist anymore
+            req.session.user = null;
+        }
+    }
+    res.render('index', { user: user });
+});
+
+// ============================================================
+// PAYMENT ROUTES - Pay-per-use model
+// ============================================================
+
+// Initialize payment for a specific action
+app.post('/api/initialize-payment', async (req, res) => {
+    try {
+        const { email, action, amount } = req.body;
+        
+        if (!email) {
+            return res.status(400).json({ error: 'Email is required' });
+        }
+
+        const actionPrices = {
+            'add_wall': 10,
+            'add_concrete': 10,
+            'add_plaster': 10,
+            'add_rc': 10,
+            'add_roof': 10,
+            'add_painting': 10,
+            'add_tiling': 10,
+            'add_siteworks': 10,
+            'pdf_export': 10,
+            'whatsapp_share': 10
+        };
+
+        const finalAmount = amount || actionPrices[action] || 10;
+
+        const response = await axios.post('https://api.paystack.co/transaction/initialize', {
+            email: email,
+            amount: finalAmount * 100,
+            metadata: {
+                action: action,
+                email: email,
+                amount: finalAmount
+            },
+            callback_url: `${req.protocol}://${req.get('host')}/payment/verify`
+        }, {
+            headers: {
+                'Authorization': `Bearer ${process.env.PAYSTACK_SECRET_KEY}`,
+                'Content-Type': 'application/json'
+            }
+        });
+
+        if (response.data.status) {
+            const data = readData();
+            if (!data.transactions) {
+                data.transactions = [];
+            }
+            data.transactions.push({
+                reference: response.data.data.reference,
+                email: email,
+                action: action,
+                amount: finalAmount,
+                status: 'pending',
+                createdAt: new Date().toISOString()
+            });
+            writeData(data);
+
+            res.json({
+                success: true,
+                authorization_url: response.data.data.authorization_url,
+                reference: response.data.data.reference
+            });
+        } else {
+            res.status(400).json({ error: response.data.message });
+        }
+    } catch (error) {
+        console.error('Payment initialization error:', error.response?.data || error.message);
+        res.status(500).json({ error: 'Failed to initialize payment' });
+    }
+});
+
+// Verify payment
+app.get('/payment/verify', async (req, res) => {
+    try {
+        const { reference } = req.query;
+        
+        if (!reference) {
+            return res.redirect('/?payment=error&message=Missing reference');
+        }
+
+        const response = await axios.get(`https://api.paystack.co/transaction/verify/${reference}`, {
+            headers: {
+                'Authorization': `Bearer ${process.env.PAYSTACK_SECRET_KEY}`
+            }
+        });
+
+        if (response.data.status && response.data.data.status === 'success') {
+            const metadata = response.data.data.metadata;
+            const email = metadata.email || response.data.data.customer.email;
+            const action = metadata.action || 'add_wall';
+            const amount = response.data.data.amount / 100;
+
+            const data = readData();
+            
+            if (!data.transactions) {
+                data.transactions = [];
+            }
+            
+            const transaction = data.transactions.find(t => t.reference === reference);
+            if (transaction) {
+                transaction.status = 'completed';
+                transaction.paidAt = new Date().toISOString();
+            }
+
+            if (!data.users) {
+                data.users = [];
+            }
+            
+            let user = data.users.find(u => u.email === email);
+            if (!user) {
+                user = {
+                    email: email,
+                    credits: {
+                        add_wall: 0,
+                        add_concrete: 0,
+                        add_plaster: 0,
+                        add_rc: 0,
+                        add_roof: 0,
+                        add_painting: 0,
+                        add_tiling: 0,
+                        add_siteworks: 0,
+                        pdf_export: 0,
+                        whatsapp_share: 0
+                    },
+                    totalSpent: 0,
+                    createdAt: new Date().toISOString()
+                };
+                data.users.push(user);
+            }
+
+            if (!user.credits) {
+                user.credits = {
+                    add_wall: 0,
+                    add_concrete: 0,
+                    add_plaster: 0,
+                    add_rc: 0,
+                    add_roof: 0,
+                    add_painting: 0,
+                    add_tiling: 0,
+                    add_siteworks: 0,
+                    pdf_export: 0,
+                    whatsapp_share: 0
+                };
+            }
+
+            user.credits[action] = (user.credits[action] || 0) + 1;
+            user.totalSpent = (user.totalSpent || 0) + amount;
+
+            writeData(data);
+            
+            // Store user in session
+            req.session.user = user;
+
+            res.redirect(`/?payment=success&action=${action}`);
+        } else {
+            res.redirect('/?payment=error&message=Payment verification failed');
+        }
+    } catch (error) {
+        console.error('Payment verification error:', error.message);
+        res.redirect('/?payment=error&message=Verification failed');
+    }
+});
+
+// Check remaining credits for an action
+app.get('/api/check-credits/:email/:action', (req, res) => {
+    try {
+        const { email, action } = req.params;
+        const data = readData();
+        
+        if (!data.users) {
+            data.users = [];
+        }
+        
+        const user = data.users.find(u => u.email === email);
+        
+        if (user && user.credits && user.credits[action] !== undefined) {
+            // Also update session with latest credit data
+            if (req.session.user && req.session.user.email === email) {
+                req.session.user = user;
+            }
+            res.json({ 
+                credits: user.credits[action],
+                hasCredit: user.credits[action] > 0
+            });
+        } else {
+            res.json({ credits: 0, hasCredit: false });
+        }
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to check credits' });
+    }
+});
+
+// Use a credit
+app.post('/api/use-credit', (req, res) => {
+    try {
+        const { email, action } = req.body;
+        const data = readData();
+        
+        if (!data.users) {
+            data.users = [];
+        }
+        
+        const user = data.users.find(u => u.email === email);
+        
+        if (user && user.credits && user.credits[action] > 0) {
+            user.credits[action]--;
+            writeData(data);
+            
+            // Update session with fresh data
+            if (req.session.user && req.session.user.email === email) {
+                req.session.user = user;
+            }
+            
+            res.json({ 
+                success: true, 
+                remaining: user.credits[action],
+                totalCredits: Object.values(user.credits).reduce((a, b) => a + b, 0)
+            });
+        } else {
+            res.json({ success: false, error: 'No credits available' });
+        }
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to use credit' });
+    }
+});
+
+// Get user's full credit summary
+app.get('/api/user-summary/:email', (req, res) => {
+    try {
+        const { email } = req.params;
+        const data = readData();
+        const user = data.users.find(u => u.email === email);
+        
+        if (user) {
+            const totalCredits = Object.values(user.credits || {}).reduce((a, b) => a + b, 0);
+            res.json({
+                email: user.email,
+                credits: user.credits,
+                totalCredits: totalCredits,
+                totalSpent: user.totalSpent,
+                createdAt: user.createdAt
+            });
+        } else {
+            res.json({ error: 'User not found' });
+        }
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to get user summary' });
+    }
+});
+
+// Webhook endpoint for Paystack
+app.post('/webhook/paystack', (req, res) => {
+    try {
+        const signature = req.headers['x-paystack-signature'];
+        const body = req.body;
+
+        const hash = crypto
+            .createHmac('sha512', process.env.PAYSTACK_SECRET_KEY)
+            .update(JSON.stringify(body))
+            .digest('hex');
+
+        if (hash !== signature) {
+            return res.status(401).send('Invalid signature');
+        }
+
+        if (body.event === 'charge.success') {
+            const data = body.data;
+            const metadata = data.metadata;
+            const email = metadata.email || data.customer.email;
+            const action = metadata.action || 'add_wall';
+            const reference = data.reference;
+            const amount = data.amount / 100;
+
+            const jsonData = readData();
+            
+            if (!jsonData.transactions) {
+                jsonData.transactions = [];
+            }
+            
+            const transaction = jsonData.transactions.find(t => t.reference === reference);
+            if (transaction) {
+                transaction.status = 'completed';
+                transaction.paidAt = new Date().toISOString();
+            }
+
+            if (!jsonData.users) {
+                jsonData.users = [];
+            }
+            
+            let user = jsonData.users.find(u => u.email === email);
+            if (!user) {
+                user = {
+                    email: email,
+                    credits: {
+                        add_wall: 0,
+                        add_concrete: 0,
+                        add_plaster: 0,
+                        add_rc: 0,
+                        add_roof: 0,
+                        add_painting: 0,
+                        add_tiling: 0,
+                        add_siteworks: 0,
+                        pdf_export: 0,
+                        whatsapp_share: 0
+                    },
+                    totalSpent: 0,
+                    createdAt: new Date().toISOString()
+                };
+                jsonData.users.push(user);
+            }
+
+            if (!user.credits) {
+                user.credits = {
+                    add_wall: 0,
+                    add_concrete: 0,
+                    add_plaster: 0,
+                    add_rc: 0,
+                    add_roof: 0,
+                    add_painting: 0,
+                    add_tiling: 0,
+                    add_siteworks: 0,
+                    pdf_export: 0,
+                    whatsapp_share: 0
+                };
+            }
+
+            user.credits[action] = (user.credits[action] || 0) + 1;
+            user.totalSpent = (user.totalSpent || 0) + amount;
+
+            writeData(jsonData);
+        }
+
+        res.sendStatus(200);
+    } catch (error) {
+        console.error('Webhook error:', error);
+        res.sendStatus(500);
+    }
+});
+
+app.listen(PORT, () => {
+    console.log(`Mjengo Pro server running on http://localhost:${PORT}`);
+});

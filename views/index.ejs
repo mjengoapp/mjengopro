@@ -1,0 +1,1378 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+  <title>Mjengo Pro · Pay-Per-Use</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://js.paystack.co/v1/inline.js"></script>
+  <style>
+    * { box-sizing: border-box; font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif; -webkit-tap-highlight-color: transparent; }
+    body { margin: 0; padding: 12px; background: #f0f4f8; color: #0b1a2e; min-height: 100vh; }
+    .card { max-width: 100%; margin: 0 auto; background: white; padding: 20px 16px 28px; border-radius: 28px; box-shadow: 0 8px 30px rgba(0,0,0,0.06); }
+    h2 { font-size: 1.1rem; font-weight: 600; margin: 1.2rem 0 0.6rem; color: #0b2b44; border-bottom: 2px solid #eef2f6; padding-bottom: 0.4rem; }
+    h3 { font-weight: 500; font-size: 0.95rem; margin: 0.25rem 0; color: #1e3b5a; }
+    h4 { font-weight: 600; font-size: 0.85rem; margin: 0.5rem 0 0.25rem; color: #1e3b5a; }
+    .header-bar { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; margin-bottom: 8px; gap: 8px; }
+    .header-bar h2 { margin: 0; border: none; padding: 0; font-size: 1.2rem; }
+    .badge { background: #e8f0fe; color: #1a5fa8; padding: 4px 14px; border-radius: 40px; font-size: 0.7rem; font-weight: 600; letter-spacing: 0.3px; white-space: nowrap; }
+    
+    .tabs-wrapper { 
+      position: relative;
+      margin: 4px 0 16px;
+      border-radius: 16px;
+      background: #f2f6fc;
+      padding: 4px;
+      overflow-x: auto;
+      overflow-y: hidden;
+      -webkit-overflow-scrolling: touch;
+      scroll-behavior: smooth;
+    }
+    .tabs-wrapper::-webkit-scrollbar { height: 2px; }
+    .tabs-wrapper::-webkit-scrollbar-track { background: transparent; }
+    .tabs-wrapper::-webkit-scrollbar-thumb { background: #b0c4db; border-radius: 10px; }
+    .tabs { display: flex; gap: 4px; min-width: max-content; padding: 2px 2px; }
+    .tab-btn { padding: 10px 14px; border: none; background: transparent; border-radius: 12px; font-size: 0.8rem; font-weight: 600; cursor: pointer; transition: all 0.2s; color: #5a7a95; touch-action: manipulation; white-space: nowrap; -webkit-tap-highlight-color: transparent; min-width: 60px; flex-shrink: 0; }
+    .tab-btn.active { background: white; color: #1b3b5c; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+    .tab-btn:active { transform: scale(0.97); }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+    .ratio-group { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; background: #f2f6fc; padding: 10px 14px; border-radius: 40px; margin-top: 2px; }
+    .ratio-group input { width: 60px; min-width: 50px; height: 40px; font-size: 14px; }
+    input, .block-input { height: 44px; font-size: 15px; padding: 0 12px; border: 2px solid #d7dfe9; border-radius: 14px; background: white; transition: all 0.15s; width: 100%; min-width: 55px; -webkit-appearance: none; appearance: none; }
+    input:focus { outline: none; border-color: #2c7be0; box-shadow: 0 0 0 3px rgba(44,123,224,0.12); }
+    input:disabled { background: #f5f5f5; color: #666; cursor: not-allowed; }
+    .btn { background: #1b3b5c; color: white; border: none; padding: 14px 20px; font-size: 1rem; font-weight: 600; border-radius: 60px; cursor: pointer; transition: all 0.15s; margin: 12px 0 8px; width: 100%; letter-spacing: 0.3px; box-shadow: 0 4px 12px rgba(27,59,92,0.2); touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+    .btn:active { transform: scale(0.97); background: #143049; }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+    .btn-pdf { background: #dc3545; color: white; border: none; padding: 12px 18px; font-size: 0.95rem; font-weight: 600; border-radius: 60px; cursor: pointer; transition: all 0.15s; margin-top: 6px; width: 100%; box-shadow: 0 2px 12px rgba(220,53,69,0.2); display: flex; align-items: center; justify-content: center; gap: 8px; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+    .btn-pdf:active { transform: scale(0.97); background: #c82333; }
+    .btn-whatsapp { background: #25D366; color: white; border: none; padding: 12px 18px; font-size: 0.95rem; font-weight: 600; border-radius: 60px; cursor: pointer; transition: all 0.15s; margin-top: 6px; width: 100%; box-shadow: 0 2px 12px rgba(37,211,102,0.2); display: flex; align-items: center; justify-content: center; gap: 8px; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+    .btn-whatsapp:active { transform: scale(0.97); background: #1da85a; }
+    .btn-whatsapp:disabled, .btn-pdf:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.85rem; margin-top: 10px; border-radius: 16px; overflow: hidden; }
+    th { background: #e8eef5; font-weight: 600; color: #12344a; padding: 10px 6px; text-align: left; font-size: 0.8rem; }
+    td { padding: 6px 4px; border-bottom: 1px solid #e9edf2; vertical-align: middle; }
+    .qty, .rate { background: #fbfdff; border-radius: 10px; border: 2px solid #d7dfe9; font-weight: 500; height: 38px; line-height: 1.4; width: 100%; box-sizing: border-box; font-size: 14px; padding: 0 8px; transition: all 0.15s; -webkit-appearance: none; appearance: none; }
+    .qty:focus, .rate:focus, .editable-number:focus { outline: none; border-color: #2c7be0; box-shadow: 0 0 0 3px rgba(44,123,224,0.10); background: white; }
+    .cost { font-weight: 500; text-align: right; padding-right: 8px; font-size: 0.9rem; }
+    .total-row { background: #f2f8ff; font-weight: 600; }
+    .total-row th { background: #e2ecfa; }
+    .tax-row { background: #f8faff; }
+    .editable-number { height: 38px; padding: 0 8px; border-radius: 10px; border: 2px solid #d7dfe9; font-size: 14px; background: white; width: 70px; transition: all 0.15s; -webkit-appearance: none; appearance: none; }
+    .editable-number:focus { outline: none; border-color: #2c7be0; box-shadow: 0 0 0 3px rgba(44,123,224,0.10); }
+    .labour-cost, .misc-out, .tax-out { min-width: 45px; display: inline-block; text-align: right; padding-right: 4px; font-weight: 500; }
+    .item-block { background: #f8faff; border-radius: 14px; padding: 14px; margin-bottom: 14px; border: 2px solid #e8eef5; position: relative; }
+    .item-block .item-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+    .item-block .item-header .item-title { font-weight: 600; color: #1b3b5c; font-size: 0.9rem; }
+    .item-block .item-header .item-remove { background: none; border: none; color: #b02b2b; font-size: 1.1rem; cursor: pointer; padding: 4px 8px; border-radius: 8px; touch-action: manipulation; }
+    .item-block .item-header .item-remove:active { background: #fee8e8; }
+    .item-block .item-total { text-align: right; font-weight: 700; color: #0d2d49; font-size: 1rem; margin-top: 8px; padding-top: 8px; border-top: 1px solid #e9edf2; }
+    .add-item-btn-pay { background: linear-gradient(135deg, #f5af19, #f12711); color: white; border: none; padding: 10px; border-radius: 14px; font-weight: 600; cursor: pointer; text-align: center; transition: all 0.15s; touch-action: manipulation; -webkit-tap-highlight-color: transparent; font-size: 0.9rem; width: 100%; margin-top: 8px; }
+    .add-item-btn-pay:active { transform: scale(0.97); opacity: 0.9; }
+    .add-item-btn-pay:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+    .add-btn-free { background: linear-gradient(135deg, #4caf50, #2e7d32) !important; }
+    .add-btn-paid { background: linear-gradient(135deg, #f5af19, #f12711) !important; }
+    .add-btn-locked { background: linear-gradient(135deg, #999, #666) !important; opacity: 0.5; }
+    .combined-total { background: #1b3b5c; color: white; padding: 14px 18px; border-radius: 14px; display: flex; justify-content: space-between; align-items: center; margin-top: 12px; }
+    .combined-total .label { font-size: 0.95rem; font-weight: 600; }
+    .combined-total .amount { font-size: 1.3rem; font-weight: 800; }
+    .combined-total .amount small { font-size: 0.7rem; font-weight: 400; opacity: 0.8; }
+    .subnote { font-size: 0.75rem; color: #5a7a95; padding: 10px 0 0; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 8px; border-top: 1px solid #eef2f6; margin-top: 8px; }
+    .helper-text { font-size: 0.65rem; color: #6a8aa8; margin-top: 6px; display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
+    .helper-text span { background: #f4f8fc; padding: 3px 10px; border-radius: 20px; white-space: nowrap; }
+    .details-box { background: #f8faff; padding: 10px; border-radius: 12px; margin: 8px 0; border: 1px solid #e8eef5; }
+    .details-box .detail-row { display: flex; justify-content: space-between; padding: 4px 8px; border-bottom: 1px solid #eef2f6; }
+    .details-box .detail-row:last-child { border-bottom: none; }
+    .details-box .detail-label { font-size: 0.75rem; color: #6a8aa8; }
+    .details-box .detail-value { font-size: 0.85rem; font-weight: 600; color: #1b3b5c; }
+    .scroll-hint { text-align: center; font-size: 0.6rem; color: #b0c4db; margin-top: -10px; margin-bottom: 6px; }
+    .credits-display { background: #e8f5e9; padding: 8px 16px; border-radius: 12px; margin: 8px 0; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 8px; }
+    .credits-display .credit-item { font-size: 0.75rem; color: #2e7d32; }
+    .credits-display .credit-item strong { font-weight: 700; }
+    .btn-group { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 8px; }
+    .summary-box { background: #f8faff; padding: 12px 16px; border-radius: 14px; border: 2px solid #e8eef5; margin-top: 8px; }
+    .summary-box .row { display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px solid #eef2f6; }
+    .summary-box .row:last-child { border-bottom: none; }
+    .summary-box .label { font-size: 0.85rem; color: #6a8aa8; }
+    .summary-box .value { font-size: 0.9rem; font-weight: 600; color: #1b3b5c; }
+    .consumed-notice { background: #fff3e0; border: 2px solid #ff9800; padding: 10px 12px; border-radius: 10px; margin: 10px 0; text-align: center; }
+    .consumed-notice p { margin: 4px 0; color: #e65100; font-weight: 600; font-size: 0.85rem; }
+    .consumed-value { display: inline-block; padding: 4px 12px; background: #e8eef5; border-radius: 6px; font-size: 0.85rem; margin: 2px 4px; color: #333; }
+    .wallet-section { background: #e3f2fd; padding: 12px 16px; border-radius: 14px; margin-top: 8px; border: 2px solid #90caf9; display: none; }
+    .wallet-section .wallet-row { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; }
+    .wallet-section .wallet-info { display: flex; flex-wrap: wrap; gap: 16px; }
+    .wallet-section .wallet-info span { font-size: 0.9rem; }
+    .wallet-section .wallet-info .balance { color: #0d47a1; font-weight: 700; }
+    .wallet-load-btn { background: #1b3b5c; color: white; border: none; padding: 6px 16px; border-radius: 8px; cursor: pointer; font-weight: 600; }
+    .wallet-load-btn:hover { background: #0d2d49; }
+    .wallet-load-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .wallet-hint { font-size: 0.75rem; color: #1a5fa8; margin-top: 4px; }
+    .premium-banner {
+        background: linear-gradient(135deg, #1b3b5c, #2c7be0);
+        color: white;
+        padding: 16px 20px;
+        border-radius: 14px;
+        margin-bottom: 16px;
+        text-align: center;
+        border: 2px solid #ffd700;
+    }
+    .premium-banner h3 {
+        margin: 0;
+        color: #ffd700;
+        font-size: 1.1rem;
+    }
+    .premium-banner p {
+        margin: 4px 0;
+        font-size: 0.9rem;
+        opacity: 0.9;
+    }
+    .btn-premium {
+        background: #ffd700;
+        color: #1b3b5c;
+        padding: 10px 24px;
+        border-radius: 60px;
+        text-decoration: none;
+        font-weight: 700;
+        font-size: 0.95rem;
+        display: inline-block;
+        border: none;
+        cursor: pointer;
+        transition: transform 0.2s;
+    }
+    .btn-premium:hover { transform: scale(1.05); }
+    .btn-premium:active { transform: scale(0.95); }
+    .premium-footer {
+        margin-top: 16px;
+        padding-top: 16px;
+        border-top: 2px solid #eef2f6;
+        text-align: center;
+    }
+    .premium-footer p {
+        font-size: 0.85rem;
+        color: #6a8aa8;
+        margin: 0;
+    }
+    .premium-footer a {
+        color: #1b3b5c;
+        font-weight: 700;
+        text-decoration: underline;
+    }
+    @media (max-width: 480px) {
+      body { padding: 8px; }
+      .card { padding: 14px 10px; border-radius: 20px; }
+      input { height: 40px; font-size: 14px; }
+      .btn { padding: 12px; font-size: 0.9rem; }
+      .ratio-group { padding: 6px 10px; gap: 4px 8px; }
+      .ratio-group input { width: 50px; height: 36px; font-size: 13px; }
+      .header-bar h2 { font-size: 1rem; }
+      table { font-size: 0.75rem; }
+      .qty, .rate { height: 36px; font-size: 13px; padding: 0 6px; }
+      .editable-number { height: 36px; font-size: 13px; width: 60px; }
+      .subnote { font-size: 0.65rem; flex-direction: column; align-items: stretch; }
+      .btn-pdf, .btn-whatsapp { width: 100%; }
+      .helper-text span { font-size: 0.6rem; padding: 2px 8px; }
+      .tab-btn { font-size: 0.7rem; padding: 8px 10px; min-width: 50px; }
+      .item-block { padding: 10px; }
+      .btn-group { grid-template-columns: 1fr; }
+      .credits-display { flex-direction: column; align-items: stretch; }
+      .summary-box { grid-column: 1 / -1; }
+      .wallet-section .wallet-row { flex-direction: column; align-items: stretch; }
+      .wallet-section .wallet-info { flex-direction: column; gap: 4px; }
+      .premium-banner .btn-premium { font-size: 0.85rem; padding: 8px 16px; }
+    }
+  </style>
+</head>
+<body>
+<div class="card">
+  <div class="header-bar">
+    <h2>🏗️ Mjengo Pro</h2>
+    <span class="badge">💰 Pay-Per-Use</span>
+  </div>
+
+  <!-- ===== PREMIUM APP BANNER ===== -->
+  <div class="premium-banner">
+    <div style="display: flex; align-items: center; justify-content: center; gap: 12px; flex-wrap: wrap;">
+      <span style="font-size: 2rem;">⭐</span>
+      <div>
+        <h3>Get the Premium App!</h3>
+        <p>Pay once, use forever. No per-use fees!</p>
+      </div>
+      <a href="https://play.google.com/store/apps/details?id=com.ericsimiyu.mjengopremium" 
+         target="_blank" 
+         class="btn-premium">
+        📲 Get on Play Store
+      </a>
+    </div>
+  </div>
+
+  <!-- User Email Input -->
+  <div style="background: #f8faff; padding: 12px 16px; border-radius: 14px; margin-bottom: 12px; border: 2px solid #e8eef5;">
+    <h3 style="margin: 0 0 6px 0;">👤 Your Email</h3>
+    <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+      <input type="email" id="userEmail" placeholder="Enter your email" style="flex: 1; min-width: 150px; height: 44px; padding: 0 12px; border: 2px solid #d7dfe9; border-radius: 14px; font-size: 14px;" value="<%= user ? user.email : '' %>">
+      <button onclick="App.setUser()" style="background: #1b3b5c; color: white; border: none; padding: 10px 20px; border-radius: 14px; font-weight: 600; cursor: pointer;">Set Email</button>
+    </div>
+    
+    <div id="verificationStatus" style="display: none; margin-top: 8px; padding: 8px 12px; border-radius: 10px;"></div>
+    
+    <!-- Wallet Section -->
+    <div id="walletSection" class="wallet-section">
+      <div class="wallet-row">
+        <div class="wallet-info">
+          <span>💰 <strong>Wallet:</strong> <span class="balance" id="walletBalance">KES 0.00</span></span>
+          <span>🎁 <strong>Free Credits:</strong> <span id="freeCreditCount">0</span></span>
+        </div>
+        <button class="wallet-load-btn" onclick="App.loadWallet()">💳 Load Wallet</button>
+      </div>
+      <div class="wallet-hint">💡 Each calculation costs KES 5. Load any amount and use as you go!</div>
+    </div>
+    
+    <!-- Credit Summary -->
+    <div id="userCreditsSummary" style="display: none; margin-top: 10px; padding-top: 10px; border-top: 2px solid #e8eef5;">
+      <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 8px;">
+        <div class="summary-box"><div class="row"><span class="label">🎁 Free Credits</span><span class="value" id="freeCredits">0</span></div></div>
+        <div class="summary-box"><div class="row"><span class="label">💰 Paid Credits</span><span class="value" id="paidCredits">0</span></div></div>
+        <div class="summary-box"><div class="row"><span class="label">📊 Total Credits</span><span class="value" id="totalCredits">0</span></div></div>
+        <div class="summary-box"><div class="row"><span class="label">💵 Total Spent</span><span class="value" id="totalSpent">KES 0</span></div></div>
+      </div>
+      <div id="userCredits" class="credits-display" style="display: none; margin-top: 8px;"></div>
+    </div>
+  </div>
+
+  <!-- ===== SCROLLABLE TABS (5 calculators) ===== -->
+  <div class="tabs-wrapper">
+    <div class="tabs" id="tabContainer">
+      <button class="tab-btn active" data-tab="walling" onclick="App.switchTab('walling')">🧱 Walling</button>
+      <button class="tab-btn" data-tab="concrete" onclick="App.switchTab('concrete')">🧪 Concrete</button>
+      <button class="tab-btn" data-tab="plaster" onclick="App.switchTab('plaster')">🧹 Plaster</button>
+      <button class="tab-btn" data-tab="painting" onclick="App.switchTab('painting')">🎨 Painting</button>
+      <button class="tab-btn" data-tab="tiling" onclick="App.switchTab('tiling')">🪠 Tiling</button>
+    </div>
+  </div>
+  <div class="scroll-hint">← swipe to see more →</div>
+
+  <!-- ===== ALL 5 TABS ===== -->
+  <div id="tab-walling" class="tab-content active"><div id="walling-container"></div><button class="add-item-btn-pay" id="add-walling-btn" onclick="App.addItemWithPayment('walling')">💰 Add Wall</button><div class="combined-total"><span class="label">🧱 Combined Walling Total</span><span class="amount" id="walling-combined-total">0.00 <small>currency</small></span></div></div>
+  <div id="tab-concrete" class="tab-content"><div id="concrete-container"></div><button class="add-item-btn-pay" id="add-concrete-btn" onclick="App.addItemWithPayment('concrete')">💰 Add Concrete</button><div class="combined-total"><span class="label">🧪 Combined Concrete Total</span><span class="amount" id="concrete-combined-total">0.00 <small>currency</small></span></div></div>
+  <div id="tab-plaster" class="tab-content"><div id="plaster-container"></div><button class="add-item-btn-pay" id="add-plaster-btn" onclick="App.addItemWithPayment('plaster')">💰 Add Plaster</button><div class="combined-total"><span class="label">🧹 Combined Plaster Total</span><span class="amount" id="plaster-combined-total">0.00 <small>currency</small></span></div></div>
+  <div id="tab-painting" class="tab-content"><div id="painting-container"></div><button class="add-item-btn-pay" id="add-painting-btn" onclick="App.addItemWithPayment('painting')">💰 Add Painting Job</button><div class="combined-total"><span class="label">🎨 Combined Painting Total</span><span class="amount" id="painting-combined-total">0.00 <small>currency</small></span></div></div>
+  <div id="tab-tiling" class="tab-content"><div id="tiling-container"></div><button class="add-item-btn-pay" id="add-tiling-btn" onclick="App.addItemWithPayment('tiling')">💰 Add Tiling Job</button><div class="combined-total"><span class="label">🪠 Combined Tiling Total</span><span class="amount" id="tiling-combined-total">0.00 <small>currency</small></span></div></div>
+
+  <div class="subnote">
+    <span>✏️ tap any <strong>Qty</strong> or <strong>Rate</strong> to edit</span>
+  </div>
+  
+  <div class="btn-group">
+    <button class="btn-pdf" id="pdfBtn" onclick="App.payAndExport('pdf')">📄 PDF (KES 5)</button>
+    <button class="btn-whatsapp" id="whatsappBtn" onclick="App.payAndExport('whatsapp')">💬 WhatsApp (KES 5)</button>
+  </div>
+  
+  <div class="helper-text">
+    <span>🎁 3 Free calculations for new users</span>
+    <span>💰 Pay per use - KES 5 per calculation</span>
+    <span>📄 PDF - KES 5</span>
+    <span>💬 WhatsApp - KES 5</span>
+    <span>💾 Credits saved permanently on server</span>
+  </div>
+
+  <div class="premium-footer">
+    <p>
+      🚀 Want unlimited calculations? 
+      <a href="https://play.google.com/store/apps/details?id=com.ericsimiyu.mjengopremium" target="_blank">
+        Get the Premium App
+      </a>
+    </p>
+  </div>
+</div>
+
+<script>
+// ============================================================
+//  COMPLETE APP - 5 Calculators + Wallet System + Verification
+// ============================================================
+
+const App = {
+  counters: { walling: 0, concrete: 0, plaster: 0, painting: 0, tiling: 0 },
+  userEmail: '',
+  credits: {},
+  isVerified: false,
+  
+  actionMap: {
+    'walling': 'add_wall',
+    'concrete': 'add_concrete',
+    'plaster': 'add_plaster',
+    'painting': 'add_painting',
+    'tiling': 'add_tiling'
+  },
+  
+  calculations: {
+    walling: [],
+    concrete: [],
+    plaster: [],
+    painting: [],
+    tiling: []
+  },
+
+  // ===== INIT =====
+  init() {
+    this.setupAutoSelect();
+    this.loadUserCredits();
+    setTimeout(() => {
+      this.loadCalculations('walling');
+    }, 200);
+  },
+
+  setupAutoSelect() {
+    document.addEventListener('focusin', (e) => {
+      if (e.target.tagName === 'INPUT' && !e.target.disabled) {
+        setTimeout(() => e.target.select(), 10);
+      }
+    });
+  },
+
+  switchTab(tab) {
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.tab === tab);
+    });
+    document.querySelectorAll('.tab-content').forEach(el => {
+      el.classList.toggle('active', el.id === 'tab-' + tab);
+    });
+    this.loadCalculations(tab);
+  },
+
+  // ===== WALLET FUNCTIONS =====
+  async loadWallet() {
+    const email = this.userEmail || document.getElementById('userEmail').value;
+    
+    if (!email || !email.includes('@')) {
+      alert('⚠️ Please enter your email first!');
+      document.getElementById('userEmail').focus();
+      return;
+    }
+    
+    const amount = prompt('💰 Enter amount to load (KES):', '100');
+    if (!amount || isNaN(amount) || parseInt(amount) < 10) {
+      alert('⚠️ Please enter a valid amount (minimum KES 10)');
+      return;
+    }
+    
+    const loadBtn = document.querySelector('.wallet-load-btn');
+    if (loadBtn) {
+      loadBtn.textContent = '⏳ Processing...';
+      loadBtn.disabled = true;
+    }
+    
+    try {
+      const response = await fetch('/api/load-wallet', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, amount: parseInt(amount) })
+      });
+      const data = await response.json();
+      
+      if (data.success) {
+        window.location.href = data.authorization_url;
+      } else {
+        alert('❌ Failed to load wallet: ' + (data.error || 'Unknown error'));
+        if (loadBtn) {
+          loadBtn.textContent = '💳 Load Wallet';
+          loadBtn.disabled = false;
+        }
+      }
+    } catch (error) {
+      alert('❌ Error: ' + error.message);
+      if (loadBtn) {
+        loadBtn.textContent = '💳 Load Wallet';
+        loadBtn.disabled = false;
+      }
+    }
+  },
+
+  async checkWalletBalance() {
+    const email = this.userEmail || document.getElementById('userEmail').value;
+    if (!email) return;
+    
+    try {
+      const response = await fetch(`/api/wallet-balance/${encodeURIComponent(email)}`);
+      const data = await response.json();
+      
+      if (data && data.walletBalance !== undefined) {
+        const walletSection = document.getElementById('walletSection');
+        walletSection.style.display = 'block';
+        document.getElementById('walletBalance').textContent = `KES ${data.walletBalance.toFixed(2)}`;
+        document.getElementById('freeCreditCount').textContent = data.freeCredits || 0;
+        
+        this.updateAddButtonsWithWallet(data);
+      }
+    } catch (error) {
+      console.error('Error checking wallet:', error);
+    }
+  },
+
+  async updateAddButtonsWithWallet(data) {
+    const types = ['walling', 'concrete', 'plaster', 'painting', 'tiling'];
+    const email = this.userEmail || document.getElementById('userEmail').value;
+    
+    if (!email) return;
+    
+    for (const type of types) {
+      const btn = document.getElementById(`add-${type}-btn`);
+      if (!btn) continue;
+      
+      try {
+        const action = this.actionMap[type] || `add_${type}`;
+        const creditsResponse = await fetch(`/api/check-credits/${encodeURIComponent(email)}/${action}`);
+        const creditsData = await creditsResponse.json();
+        
+        const hasFree = creditsData.freeCredits > 0;
+        const canAfford = data.walletBalance >= 5;
+        
+        if (hasFree) {
+          btn.disabled = false;
+          btn.textContent = `✅ ${type.charAt(0).toUpperCase() + type.slice(1)} (FREE)`;
+          btn.className = 'add-item-btn-pay add-btn-free';
+        } else if (canAfford) {
+          btn.disabled = false;
+          btn.textContent = `💰 ${type.charAt(0).toUpperCase() + type.slice(1)} (KES 5)`;
+          btn.className = 'add-item-btn-pay add-btn-paid';
+        } else {
+          btn.disabled = true;
+          btn.textContent = `🔒 Insufficient (KES ${data.walletBalance.toFixed(2)})`;
+          btn.className = 'add-item-btn-pay add-btn-locked';
+        }
+      } catch (error) {
+        console.error(`Error updating button for ${type}:`, error);
+      }
+    }
+  },
+
+  // ===== USER MANAGEMENT =====
+  async loadUserCredits() {
+    const email = document.getElementById('userEmail').value || localStorage.getItem('mjengo_email');
+    if (email) {
+      this.userEmail = email;
+      document.getElementById('userEmail').value = email;
+      localStorage.setItem('mjengo_email', email);
+      
+      try {
+        const response = await fetch(`/api/check-credits/${encodeURIComponent(email)}/add_wall`);
+        const data = await response.json();
+        
+        const statusEl = document.getElementById('verificationStatus');
+        const summaryEl = document.getElementById('userCreditsSummary');
+        
+        if (!data.exists || !data.verified) {
+          statusEl.style.display = 'block';
+          statusEl.style.background = '#fff3e0';
+          statusEl.style.border = '2px solid #ff9800';
+          statusEl.innerHTML = `
+            <p style="margin: 0; color: #e65100;">
+              ⚠️ Please verify your email to get 3 free calculations.
+              <button onclick="App.sendVerification()" style="background: #1b3b5c; color: white; border: none; padding: 4px 12px; border-radius: 6px; margin-left: 8px; cursor: pointer;">
+                Send Verification Email
+              </button>
+            </p>
+          `;
+          summaryEl.style.display = 'none';
+          return;
+        } else {
+          statusEl.style.display = 'none';
+        }
+        
+        const summaryResponse = await fetch(`/api/user-summary/${encodeURIComponent(email)}`);
+        const summaryData = await summaryResponse.json();
+        
+        if (summaryData && summaryData.credits !== undefined) {
+          this.isVerified = true;
+          summaryEl.style.display = 'block';
+          document.getElementById('freeCredits').textContent = summaryData.totalFree || 0;
+          document.getElementById('paidCredits').textContent = summaryData.totalPaid || 0;
+          document.getElementById('totalCredits').textContent = summaryData.totalCredits || 0;
+          document.getElementById('totalSpent').textContent = `KES ${(summaryData.totalSpent || 0).toFixed(2)}`;
+          
+          await this.checkWalletBalance();
+          
+          let creditHtml = '';
+          const actions = ['add_wall', 'add_concrete', 'add_plaster', 'add_painting', 'add_tiling', 'pdf_export', 'whatsapp_share'];
+          const labels = {
+            'add_wall': '🧱 Wall',
+            'add_concrete': '🧪 Concrete',
+            'add_plaster': '🧹 Plaster',
+            'add_painting': '🎨 Paint',
+            'add_tiling': '🪠 Tiling',
+            'pdf_export': '📄 PDF',
+            'whatsapp_share': '💬 WhatsApp'
+          };
+          
+          for (const action of actions) {
+            const free = summaryData.freeCredits?.[action] || 0;
+            const paid = summaryData.paidCredits?.[action] || 0;
+            const total = free + paid;
+            if (total > 0) {
+              creditHtml += `<span class="credit-item">${labels[action]}: <strong>${total}</strong> (${free} free, ${paid} paid)</span>`;
+            }
+          }
+          
+          const display = document.getElementById('userCredits');
+          if (summaryData.totalCredits > 0) {
+            display.style.display = 'flex';
+            display.innerHTML = creditHtml || `<span>💰 You have ${summaryData.totalCredits} credits</span>`;
+          } else {
+            display.style.display = 'none';
+          }
+        }
+      } catch (error) {
+        console.error('Error loading credits:', error);
+      }
+    }
+  },
+
+  sendVerification() {
+    const email = this.userEmail || document.getElementById('userEmail').value;
+    if (!email || !email.includes('@')) {
+      alert('Please enter a valid email address');
+      return;
+    }
+    
+    const btn = event?.target || document.querySelector('#verificationStatus button');
+    if (btn) {
+      btn.textContent = '⏳ Sending...';
+      btn.disabled = true;
+    }
+    
+    fetch('/api/send-verification', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email })
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        alert('📧 Verification email sent! Please check your inbox and click the link.');
+        const statusEl = document.getElementById('verificationStatus');
+        if (statusEl) {
+          statusEl.innerHTML = `
+            <p style="margin: 0; color: #2e7d32; background: #e8f5e9; padding: 8px; border-radius: 8px;">
+              ✅ Verification email sent to ${email}. Please check your inbox.
+            </p>
+          `;
+          statusEl.style.background = '#e8f5e9';
+          statusEl.style.border = '2px solid #4caf50';
+        }
+      } else if (data.verified) {
+        alert('✅ Your email is already verified!');
+        this.loadUserCredits();
+      } else {
+        alert('❌ Failed to send verification email: ' + (data.error || 'Please try again.'));
+      }
+    })
+    .catch(error => {
+      alert('❌ Error sending verification: ' + error.message);
+    })
+    .finally(() => {
+      if (btn) {
+        btn.textContent = 'Send Verification Email';
+        btn.disabled = false;
+      }
+    });
+  },
+
+  setUser() {
+    const email = document.getElementById('userEmail').value;
+    if (email && email.includes('@')) {
+      this.userEmail = email;
+      localStorage.setItem('mjengo_email', email);
+      
+      fetch(`/api/check-credits/${encodeURIComponent(email)}/add_wall`)
+        .then(r => r.json())
+        .then(data => {
+          if (data.exists && data.verified) {
+            this.loadUserCredits();
+            alert('✅ Email already verified! Loading your credits...');
+          } else if (data.exists && !data.verified) {
+            this.sendVerification();
+          } else {
+            this.sendVerification();
+          }
+        })
+        .catch(() => {
+          this.sendVerification();
+        });
+    } else {
+      alert('⚠️ Please enter a valid email address.');
+    }
+  },
+
+  // ===== PAYMENT FUNCTIONS =====
+  async addItemWithPayment(type) {
+    const email = this.userEmail || document.getElementById('userEmail').value;
+    
+    if (!email || !email.includes('@')) {
+      alert('⚠️ Please enter a valid email first!');
+      document.getElementById('userEmail').focus();
+      return;
+    }
+
+    const action = this.actionMap[type] || `add_${type}`;
+    
+    try {
+      const creditsResponse = await fetch(`/api/check-credits/${encodeURIComponent(email)}/${action}`);
+      const creditsData = await creditsResponse.json();
+      
+      if (!creditsData.verified) {
+        alert('⚠️ Please verify your email first! Check your inbox for the verification link.');
+        this.sendVerification();
+        return;
+      }
+      
+      if (creditsData.freeCredits > 0) {
+        const useResponse = await fetch('/api/use-credit', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, action })
+        });
+        const useData = await useResponse.json();
+        
+        if (useData.success) {
+          this.addItem(type);
+          this.loadUserCredits();
+          this.checkWalletBalance();
+          return;
+        }
+      }
+      
+      if (creditsData.walletBalance >= 5) {
+        const useResponse = await fetch('/api/use-wallet', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, action })
+        });
+        const useData = await useResponse.json();
+        
+        if (useData.success) {
+          this.addItem(type);
+          this.loadUserCredits();
+          this.checkWalletBalance();
+          return;
+        } else {
+          alert(`⚠️ ${useData.message || 'Insufficient balance'}`);
+          if (confirm('Your wallet balance is low. Would you like to load more funds?')) {
+            this.loadWallet();
+          }
+          return;
+        }
+      } else {
+        const loadNow = confirm(
+          `💰 Your wallet balance is KES ${creditsData.walletBalance.toFixed(2)}.\n` +
+          `🧮 Each calculation costs KES 5.\n\n` +
+          `Would you like to load your wallet?`
+        );
+        if (loadNow) {
+          this.loadWallet();
+        }
+        return;
+      }
+    } catch (error) {
+      console.error('Error checking wallet:', error);
+      this.initiatePayment(email, action, 5);
+    }
+  },
+
+  async payAndExport(action) {
+    const email = this.userEmail || document.getElementById('userEmail').value;
+    
+    if (!email || !email.includes('@')) {
+      alert('⚠️ Please enter a valid email first!');
+      document.getElementById('userEmail').focus();
+      return;
+    }
+
+    const actionMap = {
+      'pdf': 'pdf_export',
+      'whatsapp': 'whatsapp_share'
+    };
+    const actionKey = actionMap[action] || action;
+
+    try {
+      const creditsResponse = await fetch(`/api/check-credits/${encodeURIComponent(email)}/${actionKey}`);
+      const creditsData = await creditsResponse.json();
+      
+      if (!creditsData.verified) {
+        alert('⚠️ Please verify your email first!');
+        this.sendVerification();
+        return;
+      }
+      
+      if (creditsData.freeCredits > 0) {
+        const useResponse = await fetch('/api/use-credit', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, action: actionKey })
+        });
+        const useData = await useResponse.json();
+        
+        if (useData.success) {
+          if (action === 'pdf') {
+            this.generatePDF();
+          } else if (action === 'whatsapp') {
+            this.shareToWhatsApp();
+          }
+          this.loadUserCredits();
+          this.checkWalletBalance();
+          return;
+        }
+      }
+      
+      if (creditsData.walletBalance >= 5) {
+        const useResponse = await fetch('/api/use-wallet', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, action: actionKey })
+        });
+        const useData = await useResponse.json();
+        
+        if (useData.success) {
+          if (action === 'pdf') {
+            this.generatePDF();
+          } else if (action === 'whatsapp') {
+            this.shareToWhatsApp();
+          }
+          this.loadUserCredits();
+          this.checkWalletBalance();
+          return;
+        }
+      }
+    } catch (error) {
+      console.error('Error checking wallet:', error);
+    }
+
+    this.initiatePayment(email, actionKey, 5);
+  },
+
+  initiatePayment(email, action, amount) {
+    fetch('/api/initialize-payment', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, action, amount })
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        window.location.href = data.authorization_url;
+      } else {
+        alert('Payment failed: ' + (data.error || 'Unknown error'));
+      }
+    })
+    .catch(error => {
+      alert('Error: ' + error.message);
+    });
+  },
+
+  // ===== ADD ITEM =====
+  addItem(type) {
+    this.counters[type]++;
+    const id = `${type}-item-${this.counters[type]}`;
+    const container = document.getElementById(`${type}-container`);
+    const block = document.createElement('div');
+    block.className = 'item-block';
+    block.id = id;
+    block.dataset.consumed = 'false';
+    block.innerHTML = this.getItemTemplate(type, id, this.counters[type]);
+    container.appendChild(block);
+  },
+
+  removeItem(id) {
+    const block = document.getElementById(id);
+    if (!block) return;
+    const tab = block.closest('.tab-content');
+    block.remove();
+    if (tab) {
+      const type = tab.id.replace('tab-', '');
+      this.updateCombined(type);
+    }
+  },
+
+  // ===== GET ITEM TEMPLATE =====
+  getItemTemplate(type, id, index) {
+    const templates = {
+      walling: `
+        <div class="item-header"><span class="item-title">🧱 Wall ${index}</span><button class="item-remove" onclick="App.removeItem('${id}')">✕</button></div>
+        <div class="ratio-group"><h3>cement</h3><input type="number" class="walling-cement-ratio" value="1" step="0.5"><h3>:</h3><h3>sand</h3><input type="number" class="walling-sand-ratio" value="3" step="0.5"></div>
+        <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:6px;">
+          <div style="flex:1; min-width:55px;"><label style="font-size:0.7rem; color:#6a8aa8;">length (mm)</label><input type="number" class="walling-block-length" value="360" step="5"></div>
+          <div style="flex:1; min-width:55px;"><label style="font-size:0.7rem; color:#6a8aa8;">thickness (mm)</label><input type="number" class="walling-block-thickness" value="180" step="5"></div>
+          <div style="flex:1; min-width:55px;"><label style="font-size:0.7rem; color:#6a8aa8;">height (mm)</label><input type="number" class="walling-block-height" value="180" step="5"></div>
+        </div>
+        <div style="margin-top:6px;"><label style="font-size:0.7rem; color:#6a8aa8;">wall area (sq m)</label><input type="number" class="walling-area" value="100" step="1"></div>
+        <button class="btn" style="margin:10px 0 6px; padding:10px; font-size:0.85rem;" onclick="App.calculateItem('${id}')">⟳ Calculate Wall ${index}</button>
+        <div class="walling-results"></div>
+        <div class="item-total">Item Total: <span>0.00</span></div>
+      `,
+      concrete: `
+        <div class="item-header"><span class="item-title">🧪 Concrete ${index}</span><button class="item-remove" onclick="App.removeItem('${id}')">✕</button></div>
+        <div class="ratio-group"><h3>cement</h3><input type="number" class="concrete-cement-ratio" value="1" step="0.5"><h3>:</h3><h3>sand</h3><input type="number" class="concrete-sand-ratio" value="2" step="0.5"><h3>:</h3><h3>ballast</h3><input type="number" class="concrete-ballast-ratio" value="4" step="0.5"></div>
+        <div style="margin-top:6px;"><label style="font-size:0.7rem; color:#6a8aa8;">volume (cubic m)</label><input type="number" class="concrete-volume" value="0" step="0.5" style="max-width:180px;"></div>
+        <button class="btn" style="margin:10px 0 6px; padding:10px; font-size:0.85rem;" onclick="App.calculateItem('${id}')">⟳ Calculate Concrete ${index}</button>
+        <div class="concrete-results"></div>
+        <div class="item-total">Item Total: <span>0.00</span></div>
+      `,
+      plaster: `
+        <div class="item-header"><span class="item-title">🧹 Plaster ${index}</span><button class="item-remove" onclick="App.removeItem('${id}')">✕</button></div>
+        <div class="ratio-group"><h3>cement</h3><input type="number" class="plaster-cement-ratio" value="1" step="0.5"><h3>:</h3><h3>sand</h3><input type="number" class="plaster-sand-ratio" value="4" step="0.5"></div>
+        <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:6px;">
+          <div style="flex:1; min-width:90px;"><label style="font-size:0.7rem; color:#6a8aa8;">area (sq m)</label><input type="number" class="plaster-area" value="0" step="1"></div>
+          <div style="flex:1; min-width:90px;"><label style="font-size:0.7rem; color:#6a8aa8;">thickness (mm)</label><input type="number" class="plaster-thickness" value="15" step="1"></div>
+        </div>
+        <button class="btn" style="margin:10px 0 6px; padding:10px; font-size:0.85rem;" onclick="App.calculateItem('${id}')">⟳ Calculate Plaster ${index}</button>
+        <div class="plaster-results"></div>
+        <div class="item-total">Item Total: <span>0.00</span></div>
+      `,
+      painting: `
+        <div class="item-header"><span class="item-title">🎨 Painting ${index}</span><button class="item-remove" onclick="App.removeItem('${id}')">✕</button></div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+          <div><label style="font-size:0.7rem; color:#6a8aa8;">Structure</label>
+            <select class="painting-structure" style="height:40px; width:100%; border-radius:12px; border:2px solid #d7dfe9; padding:0 8px; font-size:14px; background:white;">
+              <option value="wall">Wall</option><option value="beams">Beams</option><option value="stair cases">Stair Case</option><option value="floor">Floor</option><option value="ceiling">Ceiling</option>
+            </select>
+          </div>
+          <div><label style="font-size:0.7rem; color:#6a8aa8;">Area (sq m)</label><input type="number" class="painting-area" value="100" step="1"></div>
+          <div><label style="font-size:0.7rem; color:#6a8aa8;">Coats</label><input type="number" class="painting-coats" value="3" step="1"></div>
+          <div><label style="font-size:0.7rem; color:#6a8aa8;">Coverage Rate (sq m/L)</label><input type="number" class="painting-coverage" value="10" step="0.5"></div>
+          <div><label style="font-size:0.7rem; color:#6a8aa8;">Primer Coverage (sq m/L)</label><input type="number" class="painting-primer-coverage" value="6" step="0.5"></div>
+          <div><label style="font-size:0.7rem; color:#6a8aa8;">Thinner (%)</label><input type="number" class="painting-thinner-percent" value="5" step="1"></div>
+          <div><label style="font-size:0.7rem; color:#6a8aa8;">Filler Rate (kg/sq m)</label><input type="number" class="painting-filler-rate" value="0.5" step="0.1"></div>
+        </div>
+        <div style="margin-top:8px;">
+          <h4 style="margin:4px 0;">💵 Prices</h4>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+            <div><label style="font-size:0.7rem; color:#6a8aa8;">Paint (per L)</label><input type="number" class="painting-paint-price" value="750" step="10"></div>
+            <div><label style="font-size:0.7rem; color:#6a8aa8;">Thinner (per L)</label><input type="number" class="painting-thinner-price" value="450" step="10"></div>
+            <div><label style="font-size:0.7rem; color:#6a8aa8;">Filler (per kg)</label><input type="number" class="painting-filler-price" value="50" step="5"></div>
+            <div><label style="font-size:0.7rem; color:#6a8aa8;">Primer (per L)</label><input type="number" class="painting-primer-price" value="600" step="10"></div>
+          </div>
+        </div>
+        <div style="margin-top:8px;">
+          <h4 style="margin:4px 0;">🔧 Other Costs</h4>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+            <div><label style="font-size:0.7rem; color:#6a8aa8;">Equipment</label><input type="number" class="painting-equipment" value="5000" step="100"></div>
+            <div><label style="font-size:0.7rem; color:#6a8aa8;">Labor (%)</label><input type="number" class="painting-labor" value="25" step="1"></div>
+            <div><label style="font-size:0.7rem; color:#6a8aa8;">Contractor (%)</label><input type="number" class="painting-contractor" value="5" step="0.5"></div>
+          </div>
+        </div>
+        <button class="btn" style="margin:10px 0 6px; padding:10px; font-size:0.85rem;" onclick="App.calculateItem('${id}')">⟳ Calculate Painting ${index}</button>
+        <div class="painting-results"></div>
+        <div class="item-total">Item Total: <span>0.00</span></div>
+      `,
+      tiling: `
+        <div class="item-header"><span class="item-title">🪠 Tiling ${index}</span><button class="item-remove" onclick="App.removeItem('${id}')">✕</button></div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+          <div><label style="font-size:0.7rem; color:#6a8aa8;">Structure</label>
+            <select class="tiling-structure" style="height:40px; width:100%; border-radius:12px; border:2px solid #d7dfe9; padding:0 8px; font-size:14px; background:white;">
+              <option value="wall">Wall</option><option value="beams">Beams</option><option value="stair cases">Stair Case</option><option value="floor" selected>Floor</option><option value="ceiling">Ceiling</option>
+            </select>
+          </div>
+          <div><label style="font-size:0.7rem; color:#6a8aa8;">Area (sq m)</label><input type="number" class="tiling-area" value="100" step="1"></div>
+          <div><label style="font-size:0.7rem; color:#6a8aa8;">Tile Length (mm)</label><input type="number" class="tiling-tile-length" value="300" step="5"></div>
+          <div><label style="font-size:0.7rem; color:#6a8aa8;">Tile Width (mm)</label><input type="number" class="tiling-tile-width" value="300" step="5"></div>
+          <div><label style="font-size:0.7rem; color:#6a8aa8;">Tile Thickness (mm)</label><input type="number" class="tiling-tile-thickness" value="6" step="1"></div>
+          <div><label style="font-size:0.7rem; color:#6a8aa8;">Tiles per Box</label><input type="number" class="tiling-tile-collection" value="16" step="1"></div>
+        </div>
+        <div style="margin-top:8px;">
+          <h4 style="margin:4px 0;">⚖️ Ratio (Cement:Sand)</h4>
+          <div style="display:flex; gap:8px; align-items:center;">
+            <div style="flex:1;"><label style="font-size:0.7rem; color:#6a8aa8;">Cement</label><input type="number" class="tiling-cement-ratio" value="1" step="0.5"></div>
+            <div style="flex:1;"><label style="font-size:0.7rem; color:#6a8aa8;">Sand</label><input type="number" class="tiling-sand-ratio" value="3" step="0.5"></div>
+          </div>
+        </div>
+        <div style="margin-top:8px;">
+          <h4 style="margin:4px 0;">💵 Prices</h4>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+            <div><label style="font-size:0.7rem; color:#6a8aa8;">Cement (per 50kg bag)</label><input type="number" class="tiling-cement-price" value="800" step="10"></div>
+            <div><label style="font-size:0.7rem; color:#6a8aa8;">Sand (per ton)</label><input type="number" class="tiling-sand-price" value="1350" step="10"></div>
+            <div><label style="font-size:0.7rem; color:#6a8aa8;">Tiles (per box)</label><input type="number" class="tiling-tile-price" value="1000" step="10"></div>
+          </div>
+        </div>
+        <div style="margin-top:8px;">
+          <h4 style="margin:4px 0;">🔧 Other Costs</h4>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+            <div><label style="font-size:0.7rem; color:#6a8aa8;">Equipment</label><input type="number" class="tiling-equipment" value="5000" step="100"></div>
+            <div><label style="font-size:0.7rem; color:#6a8aa8;">Labor (%)</label><input type="number" class="tiling-labor" value="25" step="1"></div>
+            <div><label style="font-size:0.7rem; color:#6a8aa8;">Contractor (%)</label><input type="number" class="tiling-contractor" value="5" step="0.5"></div>
+          </div>
+        </div>
+        <button class="btn" style="margin:10px 0 6px; padding:10px; font-size:0.85rem;" onclick="App.calculateItem('${id}')">⟳ Calculate Tiling ${index}</button>
+        <div class="tiling-results"></div>
+        <div class="item-total">Item Total: <span>0.00</span></div>
+      `
+    };
+    return templates[type];
+  },
+
+  // ===== LOAD SAVED CALCULATIONS =====
+  loadCalculations(type) {
+    const container = document.getElementById(`${type}-container`);
+    if (!container) return;
+    container.innerHTML = '';
+    this.counters[type] = 0;
+    const saved = this.calculations[type] || [];
+    saved.forEach((data, index) => {
+      this.counters[type]++;
+      const id = `${type}-item-${this.counters[type]}`;
+      const block = document.createElement('div');
+      block.className = 'item-block';
+      block.id = id;
+      block.dataset.consumed = 'true';
+      block.innerHTML = this.getItemTemplate(type, id, this.counters[type]);
+      container.appendChild(block);
+      const resultsContainer = block.querySelector(`.${type}-results`);
+      if (resultsContainer && data.items) {
+        this.buildTable(resultsContainer, data.items);
+        this.consumeInputs(block, type);
+      }
+    });
+    this.updateCombined(type);
+  },
+
+  // ===== SAVE CALCULATION =====
+  saveCalculation(type, id, items) {
+    const calculationData = { id, type, items, timestamp: new Date().toISOString() };
+    if (!this.calculations[type]) this.calculations[type] = [];
+    this.calculations[type].push(calculationData);
+  },
+
+  // ===== CALCULATE ITEM =====
+  calculateItem(id) {
+    const block = document.getElementById(id);
+    if (!block) return;
+    if (block.dataset.consumed === 'true') {
+      alert('⚠️ This calculation has already been consumed. Please add a new one.');
+      return;
+    }
+
+    let type = 'walling';
+    if (id.includes('concrete')) type = 'concrete';
+    else if (id.includes('plaster')) type = 'plaster';
+    else if (id.includes('painting')) type = 'painting';
+    else if (id.includes('tiling')) type = 'tiling';
+
+    const calculators = {
+      walling: this.calcWalling.bind(this),
+      concrete: this.calcConcrete.bind(this),
+      plaster: this.calcPlaster.bind(this),
+      painting: this.calcPainting.bind(this),
+      tiling: this.calcTiling.bind(this)
+    };
+    
+    const result = calculators[type](block);
+    if (result) {
+      this.saveCalculation(type, id, result.items);
+      this.buildTable(block.querySelector(`.${type}-results`), result.items);
+      this.updateCombined(type);
+      this.consumeInputs(block, type);
+      block.dataset.consumed = 'true';
+    }
+  },
+
+  // ===== CONSUME INPUTS =====
+  consumeInputs(block, type) {
+    block.dataset.consumed = 'true';
+    const inputSelectors = [
+      '.walling-cement-ratio', '.walling-sand-ratio', '.walling-block-length',
+      '.walling-block-thickness', '.walling-block-height', '.walling-area',
+      '.concrete-cement-ratio', '.concrete-sand-ratio', '.concrete-ballast-ratio',
+      '.concrete-volume', '.plaster-cement-ratio', '.plaster-sand-ratio',
+      '.plaster-area', '.plaster-thickness',
+      '.painting-structure', '.painting-area', '.painting-coats',
+      '.painting-coverage', '.painting-primer-coverage', '.painting-thinner-percent',
+      '.painting-filler-rate', '.painting-paint-price', '.painting-thinner-price',
+      '.painting-filler-price', '.painting-primer-price', '.painting-equipment',
+      '.painting-labor', '.painting-contractor',
+      '.tiling-structure', '.tiling-area',
+      '.tiling-tile-length', '.tiling-tile-width', '.tiling-tile-thickness',
+      '.tiling-tile-collection', '.tiling-cement-ratio', '.tiling-sand-ratio',
+      '.tiling-cement-price', '.tiling-sand-price', '.tiling-tile-price',
+      '.tiling-equipment', '.tiling-labor', '.tiling-contractor'
+    ];
+    const allInputs = block.querySelectorAll('input, select');
+    allInputs.forEach(input => {
+      let shouldConsume = false;
+      for (const selector of inputSelectors) {
+        if (input.matches(selector)) { shouldConsume = true; break; }
+      }
+      if (shouldConsume) {
+        const value = input.value;
+        let labelText = '';
+        const parentDiv = input.closest('div');
+        if (parentDiv) {
+          const label = parentDiv.querySelector('label');
+          if (label) labelText = label.textContent + ' ';
+        }
+        const span = document.createElement('span');
+        span.className = 'consumed-value';
+        span.textContent = `${labelText}${value}`;
+        input.parentNode.replaceChild(span, input);
+      }
+    });
+    const calcBtn = block.querySelector('.btn:not(.btn-pdf):not(.btn-whatsapp)');
+    if (calcBtn) {
+      calcBtn.disabled = true;
+      calcBtn.textContent = '✅ Calculated (Consumed)';
+      calcBtn.style.opacity = '0.5';
+      calcBtn.style.cursor = 'not-allowed';
+    }
+    if (!block.querySelector('.consumed-notice')) {
+      const notice = document.createElement('div');
+      notice.className = 'consumed-notice';
+      notice.innerHTML = `
+        <p>🔒 Input fields consumed. Adjust prices below to update totals.</p>
+        <p style="font-size:0.8rem; font-weight:normal;">Pay KES 5 to add another calculation.</p>
+      `;
+      const results = block.querySelector(`.${type}-results`);
+      if (results) results.parentNode.insertBefore(notice, results.nextSibling);
+    }
+  },
+
+  // ===== BUILD TABLE =====
+  buildTable(container, items) {
+    if (!container) return;
+    let detailsHtml = container.dataset?.details || '';
+    let html = `
+      ${detailsHtml}
+      <table>
+        <thead><tr><th>Item</th><th>Qty</th><th>Unit</th><th>Rate</th><th style="text-align:right;padding-right:8px;">Cost</th></tr></thead>
+        <tbody>
+    `;
+    items.forEach(item => {
+      html += `
+        <tr>
+          <td>${item.icon} ${item.name}</td>
+          <td><input type="number" step="any" class="qty" value="${item.qty}" data-prev="${item.qty}" inputmode="decimal"></td>
+          <td>${item.unit}</td>
+          <td><input type="number" step="any" class="rate" value="0" data-prev="0" inputmode="decimal"></td>
+          <td class="cost">0.00</td>
+        </tr>
+      `;
+    });
+    html += `
+        <tr class="total-row"><th colspan="4">Item subtotal</th><th class="item-subtotal" style="text-align:right;padding-right:8px;">0.00</th></tr>
+        <tr><td>👷 Labour (%)</td><td colspan="2"><input type="number" step="any" class="labourRate editable-number" value="10" data-prev="10" style="width:65px;" inputmode="decimal"></td><td colspan="2" class="labour-cost" style="text-align:right;padding-right:8px;">0.00</td></tr>
+        <tr><td>📦 Misc</td><td colspan="3"><input type="number" step="any" class="miscCost editable-number" value="0" data-prev="0" style="width:70px;" inputmode="decimal"></td><td class="misc-out" style="text-align:right;padding-right:8px;">0.00</td></tr>
+        <tr class="tax-row"><td>💰 Tax (%)</td><td colspan="2"><input type="number" step="any" class="taxRate editable-number" value="0" data-prev="0" style="width:65px;" inputmode="decimal"></td><td colspan="2" class="tax-out" style="text-align:right;padding-right:8px;">0.00</td></tr>
+        <tr class="total-row"><th colspan="4">ITEM TOTAL</th><th class="item-grand-total" style="text-align:right;padding-right:8px;">0.00</th></tr>
+      </tbody>
+      </table>
+    `;
+    container.innerHTML = html;
+    container.querySelectorAll('input').forEach(input => {
+      input.addEventListener('input', (e) => {
+        const target = e.target;
+        if (target.value.trim() !== '') target.dataset.prev = target.value;
+        const block = target.closest('.item-block');
+        if (block) {
+          const results = block.querySelector('.walling-results') || block.querySelector('.concrete-results') ||
+                         block.querySelector('.plaster-results') || block.querySelector('.painting-results') ||
+                         block.querySelector('.tiling-results');
+          if (results) this.updateItemTotals(results);
+          const tab = block.closest('.tab-content');
+          if (tab) {
+            const type = tab.id.replace('tab-', '');
+            this.updateCombined(type);
+          }
+        }
+      });
+    });
+    setTimeout(() => this.updateItemTotals(container), 50);
+  },
+
+  // ===== UPDATE ITEM TOTALS =====
+  updateItemTotals(container) {
+    if (!container) return;
+    let materialTotal = 0;
+    container.querySelectorAll('tr').forEach(row => {
+      const qty = row.querySelector('.qty');
+      const rate = row.querySelector('.rate');
+      const cost = row.querySelector('.cost');
+      if (qty && rate && cost) {
+        const q = parseFloat(qty.value) || 0;
+        const r = parseFloat(rate.value) || 0;
+        const c = q * r;
+        cost.textContent = c.toFixed(2);
+        materialTotal += c;
+      }
+    });
+    const subtotal = container.querySelector('.item-subtotal');
+    if (subtotal) subtotal.textContent = materialTotal.toFixed(2);
+    const labourInput = container.querySelector('.labourRate');
+    const labourEl = container.querySelector('.labour-cost');
+    let labourCost = 0;
+    if (labourInput && labourEl) {
+      labourCost = (parseFloat(labourInput.value) || 0) / 100 * materialTotal;
+      labourEl.textContent = labourCost.toFixed(2);
+    }
+    const miscInput = container.querySelector('.miscCost');
+    const miscEl = container.querySelector('.misc-out');
+    let miscCost = 0;
+    if (miscInput && miscEl) {
+      miscCost = parseFloat(miscInput.value) || 0;
+      miscEl.textContent = miscCost.toFixed(2);
+    }
+    const taxInput = container.querySelector('.taxRate');
+    const taxEl = container.querySelector('.tax-out');
+    let taxCost = 0;
+    if (taxInput && taxEl) {
+      taxCost = (parseFloat(taxInput.value) || 0) / 100 * (materialTotal + labourCost + miscCost);
+      taxEl.textContent = taxCost.toFixed(2);
+    }
+    const grandTotal = materialTotal + labourCost + miscCost + taxCost;
+    const grandEl = container.querySelector('.item-grand-total');
+    if (grandEl) grandEl.textContent = grandTotal.toFixed(2);
+    const block = container.closest('.item-block');
+    if (block) {
+      const totalEl = block.querySelector('.item-total span');
+      if (totalEl) totalEl.textContent = grandTotal.toFixed(2);
+    }
+  },
+
+  // ===== UPDATE COMBINED TOTALS =====
+  getCombinedTotal(containerId) {
+    const container = document.getElementById(containerId);
+    if (!container) return 0;
+    let total = 0;
+    container.querySelectorAll('.item-block').forEach(block => {
+      const grand = block.querySelector('.item-grand-total');
+      if (grand) total += parseFloat(grand.textContent) || 0;
+    });
+    return total;
+  },
+
+  updateCombined(type) {
+    const total = this.getCombinedTotal(`${type}-container`);
+    const el = document.getElementById(`${type}-combined-total`);
+    if (el) el.innerHTML = total.toFixed(2) + ' <small>currency</small>';
+  },
+
+  // ============================================================
+  //  5 CALCULATOR FUNCTIONS
+  // ============================================================
+
+  // ===== WALLING CALCULATOR =====
+  calcWalling(block) {
+    const cementRatio = this.getVal(block, '.walling-cement-ratio') || 1;
+    const sandRatio = this.getVal(block, '.walling-sand-ratio') || 3;
+    const length = this.getVal(block, '.walling-block-length') || 360;
+    const thickness = this.getVal(block, '.walling-block-thickness') || 180;
+    const height = this.getVal(block, '.walling-block-height') || 180;
+    const area = this.getVal(block, '.walling-area') || 0;
+
+    if (area <= 0) {
+      block.querySelector('.walling-results').innerHTML = `<p style="color:#b02b2b; background:#ffe6e6; padding:10px; border-radius:10px; text-align:center; margin:0; font-size:0.8rem;">⚠️ enter wall area > 0</p>`;
+      return null;
+    }
+
+    const builtArea = ((length + 20) / 1000) * ((height + 20) / 1000);
+    const blocks = Math.ceil(area / builtArea);
+    const wallVolume = area * (thickness / 1000);
+    const blockVolume = blocks * (length * thickness * height) / 1e9;
+    const mortar = 1.3 * (wallVolume - blockVolume);
+    const total = cementRatio + sandRatio;
+    const cement = Math.ceil(cementRatio * mortar * 28.96 / total);
+    const sand = Math.ceil(sandRatio * mortar * 2 / total);
+
+    return {
+      items: [
+        { icon: '🧱', name: 'Blocks', qty: blocks, unit: 'pcs' },
+        { icon: '🧷', name: 'Cement', qty: cement, unit: 'bags' },
+        { icon: '🏖️', name: 'Sand', qty: sand, unit: 'tons' }
+      ]
+    };
+  },
+
+  // ===== CONCRETE CALCULATOR =====
+  calcConcrete(block) {
+    const cementRatio = this.getVal(block, '.concrete-cement-ratio') || 1;
+    const sandRatio = this.getVal(block, '.concrete-sand-ratio') || 2;
+    const ballastRatio = this.getVal(block, '.concrete-ballast-ratio') || 4;
+    const volume = this.getVal(block, '.concrete-volume') || 0;
+
+    if (volume <= 0) {
+      block.querySelector('.concrete-results').innerHTML = `<p style="color:#b02b2b; background:#ffe6e6; padding:10px; border-radius:10px; text-align:center; margin:0; font-size:0.8rem;">⚠️ enter volume > 0</p>`;
+      return null;
+    }
+
+    const factor = 1.54;
+    const total = cementRatio + sandRatio + ballastRatio;
+    const wetVolume = factor * volume;
+    const cement = Math.ceil(cementRatio * wetVolume * 28.96 / total);
+    const sand = Math.ceil(sandRatio * wetVolume * 2 / total);
+    const ballast = Math.ceil(ballastRatio * wetVolume * 2.5 / total);
+
+    return {
+      items: [
+        { icon: '🧷', name: 'Cement', qty: cement, unit: 'bags' },
+        { icon: '🏖️', name: 'Sand', qty: sand, unit: 'tons' },
+        { icon: '🪨', name: 'Ballast', qty: ballast, unit: 'tons' }
+      ]
+    };
+  },
+
+  // ===== PLASTER CALCULATOR =====
+  calcPlaster(block) {
+    const cementRatio = this.getVal(block, '.plaster-cement-ratio') || 1;
+    const sandRatio = this.getVal(block, '.plaster-sand-ratio') || 4;
+    const area = this.getVal(block, '.plaster-area') || 0;
+    const thickness = this.getVal(block, '.plaster-thickness') || 15;
+
+    if (area <= 0) {
+      block.querySelector('.plaster-results').innerHTML = `<p style="color:#b02b2b; background:#ffe6e6; padding:10px; border-radius:10px; text-align:center; margin:0; font-size:0.8rem;">⚠️ enter area > 0</p>`;
+      return null;
+    }
+
+    const volume = area * (thickness / 1000);
+    const wetVolume = 1.3 * volume;
+    const total = cementRatio + sandRatio;
+    const cement = Math.ceil(cementRatio * wetVolume * 28.96 / total);
+    const sand = Math.ceil(sandRatio * wetVolume * 2 / total);
+
+    return {
+      items: [
+        { icon: '🧷', name: 'Cement', qty: cement, unit: 'bags' },
+        { icon: '🏖️', name: 'Sand', qty: sand, unit: 'tons' }
+      ]
+    };
+  },
+
+  // ===== PAINTING CALCULATOR =====
+  calcPainting(block) {
+    const area = this.getVal(block, '.painting-area') || 100;
+    const coats = this.getVal(block, '.painting-coats') || 3;
+    const coverageRate = this.getVal(block, '.painting-coverage') || 10;
+    const primerCoverage = this.getVal(block, '.painting-primer-coverage') || 6;
+    const thinnerPercent = this.getVal(block, '.painting-thinner-percent') || 5;
+    const fillerRate = this.getVal(block, '.painting-filler-rate') || 0.5;
+    const structure = block.querySelector('.painting-structure')?.value || 'wall';
+
+    const paint = Math.ceil(area * coats / coverageRate);
+    const thinner = Math.ceil(thinnerPercent * paint / 100);
+    const filler = Math.ceil(area * fillerRate);
+    const primer = Math.ceil(area / primerCoverage);
+
+    const detailsHtml = `
+      <div class="details-box">
+        <div class="detail-row"><span class="detail-label">Structure</span><span class="detail-value">${structure}</span></div>
+        <div class="detail-row"><span class="detail-label">Area</span><span class="detail-value">${area} m²</span></div>
+        <div class="detail-row"><span class="detail-label">Coats</span><span class="detail-value">${coats}</span></div>
+      </div>
+    `;
+
+    const resultsContainer = block.querySelector('.painting-results');
+    if (resultsContainer) {
+      resultsContainer.dataset.details = detailsHtml;
+    }
+
+    return {
+      items: [
+        { icon: '🧴', name: 'Primer', qty: primer, unit: 'L' },
+        { icon: '🧴', name: 'Paint', qty: paint, unit: 'L' },
+        { icon: '🧴', name: 'Thinner', qty: thinner, unit: 'L' },
+        { icon: '🧴', name: 'Filler', qty: filler, unit: 'kg' }
+      ]
+    };
+  },
+
+  // ===== TILING CALCULATOR =====
+  calcTiling(block) {
+    const area = this.getVal(block, '.tiling-area') || 100;
+    const tileLength = this.getVal(block, '.tiling-tile-length') || 300;
+    const tileWidth = this.getVal(block, '.tiling-tile-width') || 300;
+    const tileThickness = this.getVal(block, '.tiling-tile-thickness') || 6;
+    const tileCollection = this.getVal(block, '.tiling-tile-collection') || 16;
+    const cementRatio = this.getVal(block, '.tiling-cement-ratio') || 1;
+    const sandRatio = this.getVal(block, '.tiling-sand-ratio') || 3;
+    const structure = block.querySelector('.tiling-structure')?.value || 'floor';
+
+    const tiledLength = tileLength + tileThickness;
+    const tiledWidth = tileWidth + tileThickness;
+    const tiledArea = (tiledWidth * tiledLength) / 1000000;
+    
+    const tilesRequired = Math.ceil(area / tiledArea);
+    const tiles = Math.ceil(tilesRequired / tileCollection);
+    const tilesVolume = (tilesRequired * tileLength * tileWidth * tileThickness) / 1000000000;
+    const tiledAreaVolume = (area * tileThickness * 2) / 1000;
+    const volume = tiledAreaVolume - tilesVolume;
+    const dryVolume = volume * 1.3;
+    const total = cementRatio + sandRatio;
+    const cement = Math.ceil(cementRatio * dryVolume * 28.96 / total);
+    const sand = Math.ceil(sandRatio * dryVolume * 2 / total);
+
+    const detailsHtml = `
+      <div class="details-box">
+        <div class="detail-row"><span class="detail-label">Structure</span><span class="detail-value">${structure}</span></div>
+        <div class="detail-row"><span class="detail-label">Area</span><span class="detail-value">${area} m²</span></div>
+        <div class="detail-row"><span class="detail-label">Tile Size</span><span class="detail-value">${tileLength}×${tileWidth}×${tileThickness} mm</span></div>
+        <div class="detail-row"><span class="detail-label">Tiles Required</span><span class="detail-value">${tilesRequired} pcs (${tiles} boxes)</span></div>
+      </div>
+    `;
+
+    const resultsContainer = block.querySelector('.tiling-results');
+    if (resultsContainer) {
+      resultsContainer.dataset.details = detailsHtml;
+    }
+
+    return {
+      items: [
+        { icon: '🧷', name: 'Cement', qty: cement, unit: 'bags' },
+        { icon: '🏖️', name: 'Sand', qty: sand, unit: 'tons' },
+        { icon: '🪠', name: 'Tiles', qty: tiles, unit: 'boxes' }
+      ]
+    };
+  },
+
+  // ===== PDF GENERATION =====
+  generatePDF() {
+    alert('📄 PDF generation will include all saved calculations. Coming soon!');
+  },
+
+  // ===== WHATSAPP SHARE =====
+  shareToWhatsApp() {
+    alert('💬 WhatsApp share will include all saved calculations. Coming soon!');
+  },
+
+  // ===== GET VAL (Helper) =====
+  getVal(container, selector) {
+    const el = container.querySelector(selector);
+    if (!el) return 0;
+    return parseFloat(el.value) || 0;
+  },
+
+  getStr(container, selector) {
+    const el = container.querySelector(selector);
+    if (!el) return 'excavation';
+    return el.value || 'excavation';
+  }
+};
+
+// ============================================================
+//  INITIALIZE
+// ============================================================
+document.addEventListener('DOMContentLoaded', () => {
+  App.init();
+  const params = new URLSearchParams(window.location.search);
+  const paymentStatus = params.get('payment');
+  const action = params.get('action');
+  if (paymentStatus === 'success') {
+    const actionLabel = action ? action.replace('_', ' ').toUpperCase() : 'Action';
+    alert(`✅ Payment successful! You can now add ${actionLabel}.`);
+    window.history.replaceState({}, document.title, '/');
+    setTimeout(() => App.loadUserCredits(), 500);
+  } else if (paymentStatus === 'error') {
+    const message = params.get('message') || 'Payment failed';
+    alert(`❌ ${message}`);
+    window.history.replaceState({}, document.title, '/');
+  }
+});
+
+window.App = App;
+</script>
+</body>
+</html>

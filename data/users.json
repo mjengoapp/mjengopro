@@ -1,0 +1,67 @@
+{
+  "users": [
+    {
+      "email": "ericsimiyunyongesa87@gmail.com",
+      "verified": true,
+      "verificationCode": null,
+      "walletBalance": 0,
+      "freeCredits": {
+        "add_wall": 0,
+        "add_concrete": 1,
+        "add_plaster": 0,
+        "add_rc": 1,
+        "add_roof": 2,
+        "add_painting": 3,
+        "add_tiling": 3,
+        "add_siteworks": 3
+      },
+      "paidCredits": {
+        "add_wall": 0,
+        "add_concrete": 0,
+        "add_plaster": 0,
+        "add_rc": 0,
+        "add_roof": 0,
+        "add_painting": 0,
+        "add_tiling": 0,
+        "add_siteworks": 0
+      },
+      "totalFreeUsed": 11,
+      "totalSpent": 0,
+      "createdAt": "2026-08-26T12:13:12.530Z"
+    }
+  ],
+  "transactions": [
+    {
+      "reference": "zphrd02qjp",
+      "email": "ericsimiyunyongesa87@gmail.com",
+      "action": "wallet_load",
+      "amount": 100,
+      "status": "pending",
+      "createdAt": "2026-08-26T13:25:40.638Z"
+    },
+    {
+      "reference": "6p2hsw59yy",
+      "email": "ericsimiyunyongesa87@gmail.com",
+      "action": "wallet_load",
+      "amount": 10,
+      "status": "pending",
+      "createdAt": "2026-08-26T14:30:36.422Z"
+    },
+    {
+      "reference": "fbbu23ekuo",
+      "email": "ericsimiyunyongesa87@gmail.com",
+      "action": "wallet_load",
+      "amount": 100,
+      "status": "pending",
+      "createdAt": "2026-08-28T06:27:00.555Z"
+    },
+    {
+      "reference": "2h83qcu7gt",
+      "email": "ericsimiyunyongesa87@gmail.com",
+      "action": "wallet_load",
+      "amount": 100,
+      "status": "pending",
+      "createdAt": "2026-08-28T15:29:30.530Z"
+    }
+  ]
+}
