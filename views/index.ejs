@@ -46,11 +46,6 @@
     .btn { background: #1b3b5c; color: white; border: none; padding: 14px 20px; font-size: 1rem; font-weight: 600; border-radius: 60px; cursor: pointer; transition: all 0.15s; margin: 12px 0 8px; width: 100%; letter-spacing: 0.3px; box-shadow: 0 4px 12px rgba(27,59,92,0.2); touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
     .btn:active { transform: scale(0.97); background: #143049; }
     .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
-    .btn-pdf { background: #dc3545; color: white; border: none; padding: 12px 18px; font-size: 0.95rem; font-weight: 600; border-radius: 60px; cursor: pointer; transition: all 0.15s; margin-top: 6px; width: 100%; box-shadow: 0 2px 12px rgba(220,53,69,0.2); display: flex; align-items: center; justify-content: center; gap: 8px; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
-    .btn-pdf:active { transform: scale(0.97); background: #c82333; }
-    .btn-whatsapp { background: #25D366; color: white; border: none; padding: 12px 18px; font-size: 0.95rem; font-weight: 600; border-radius: 60px; cursor: pointer; transition: all 0.15s; margin-top: 6px; width: 100%; box-shadow: 0 2px 12px rgba(37,211,102,0.2); display: flex; align-items: center; justify-content: center; gap: 8px; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
-    .btn-whatsapp:active { transform: scale(0.97); background: #1da85a; }
-    .btn-whatsapp:disabled, .btn-pdf:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
     table { width: 100%; border-collapse: collapse; font-size: 0.85rem; margin-top: 10px; border-radius: 16px; overflow: hidden; }
     th { background: #e8eef5; font-weight: 600; color: #12344a; padding: 10px 6px; text-align: left; font-size: 0.8rem; }
     td { padding: 6px 4px; border-bottom: 1px solid #e9edf2; vertical-align: middle; }
@@ -91,7 +86,6 @@
     .credits-display { background: #e8f5e9; padding: 8px 16px; border-radius: 12px; margin: 8px 0; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 8px; }
     .credits-display .credit-item { font-size: 0.75rem; color: #2e7d32; }
     .credits-display .credit-item strong { font-weight: 700; }
-    .btn-group { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 8px; }
     .summary-box { background: #f8faff; padding: 12px 16px; border-radius: 14px; border: 2px solid #e8eef5; margin-top: 8px; }
     .summary-box .row { display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px solid #eef2f6; }
     .summary-box .row:last-child { border-bottom: none; }
@@ -109,40 +103,6 @@
     .wallet-load-btn:hover { background: #0d2d49; }
     .wallet-load-btn:disabled { opacity: 0.5; cursor: not-allowed; }
     .wallet-hint { font-size: 0.75rem; color: #1a5fa8; margin-top: 4px; }
-    .premium-banner {
-        background: linear-gradient(135deg, #1b3b5c, #2c7be0);
-        color: white;
-        padding: 16px 20px;
-        border-radius: 14px;
-        margin-bottom: 16px;
-        text-align: center;
-        border: 2px solid #ffd700;
-    }
-    .premium-banner h3 {
-        margin: 0;
-        color: #ffd700;
-        font-size: 1.1rem;
-    }
-    .premium-banner p {
-        margin: 4px 0;
-        font-size: 0.9rem;
-        opacity: 0.9;
-    }
-    .btn-premium {
-        background: #ffd700;
-        color: #1b3b5c;
-        padding: 10px 24px;
-        border-radius: 60px;
-        text-decoration: none;
-        font-weight: 700;
-        font-size: 0.95rem;
-        display: inline-block;
-        border: none;
-        cursor: pointer;
-        transition: transform 0.2s;
-    }
-    .btn-premium:hover { transform: scale(1.05); }
-    .btn-premium:active { transform: scale(0.95); }
     .premium-footer {
         margin-top: 16px;
         padding-top: 16px;
@@ -171,16 +131,14 @@
       .qty, .rate { height: 36px; font-size: 13px; padding: 0 6px; }
       .editable-number { height: 36px; font-size: 13px; width: 60px; }
       .subnote { font-size: 0.65rem; flex-direction: column; align-items: stretch; }
-      .btn-pdf, .btn-whatsapp { width: 100%; }
       .helper-text span { font-size: 0.6rem; padding: 2px 8px; }
       .tab-btn { font-size: 0.7rem; padding: 8px 10px; min-width: 50px; }
       .item-block { padding: 10px; }
-      .btn-group { grid-template-columns: 1fr; }
       .credits-display { flex-direction: column; align-items: stretch; }
       .summary-box { grid-column: 1 / -1; }
       .wallet-section .wallet-row { flex-direction: column; align-items: stretch; }
       .wallet-section .wallet-info { flex-direction: column; gap: 4px; }
-      .premium-banner .btn-premium { font-size: 0.85rem; padding: 8px 16px; }
+      .premium-footer p { font-size: 0.75rem; }
     }
   </style>
 </head>
@@ -189,22 +147,6 @@
   <div class="header-bar">
     <h2>🏗️ Mjengo Pro</h2>
     <span class="badge">💰 Pay-Per-Use</span>
-  </div>
-
-  <!-- ===== PREMIUM APP BANNER ===== -->
-  <div class="premium-banner">
-    <div style="display: flex; align-items: center; justify-content: center; gap: 12px; flex-wrap: wrap;">
-      <span style="font-size: 2rem;">⭐</span>
-      <div>
-        <h3>Get the Premium App!</h3>
-        <p>Pay once, use forever. No per-use fees!</p>
-      </div>
-      <a href="https://play.google.com/store/apps/details?id=com.ericsimiyu.mjengopremium" 
-         target="_blank" 
-         class="btn-premium">
-        📲 Get on Play Store
-      </a>
-    </div>
   </div>
 
   <!-- User Email Input -->
@@ -241,7 +183,7 @@
     </div>
   </div>
 
-  <!-- ===== SCROLLABLE TABS (5 calculators) ===== -->
+  <!-- ===== SCROLLABLE TABS ===== -->
   <div class="tabs-wrapper">
     <div class="tabs" id="tabContainer">
       <button class="tab-btn active" data-tab="walling" onclick="App.switchTab('walling')">🧱 Walling</button>
@@ -260,30 +202,15 @@
   <div id="tab-painting" class="tab-content"><div id="painting-container"></div><button class="add-item-btn-pay" id="add-painting-btn" onclick="App.addItemWithPayment('painting')">💰 Add Painting Job</button><div class="combined-total"><span class="label">🎨 Combined Painting Total</span><span class="amount" id="painting-combined-total">0.00 <small>currency</small></span></div></div>
   <div id="tab-tiling" class="tab-content"><div id="tiling-container"></div><button class="add-item-btn-pay" id="add-tiling-btn" onclick="App.addItemWithPayment('tiling')">💰 Add Tiling Job</button><div class="combined-total"><span class="label">🪠 Combined Tiling Total</span><span class="amount" id="tiling-combined-total">0.00 <small>currency</small></span></div></div>
 
+  <!-- ===== FOOTER ===== -->
   <div class="subnote">
     <span>✏️ tap any <strong>Qty</strong> or <strong>Rate</strong> to edit</span>
-  </div>
-  
-  <div class="btn-group">
-    <button class="btn-pdf" id="pdfBtn" onclick="App.payAndExport('pdf')">📄 PDF (KES 5)</button>
-    <button class="btn-whatsapp" id="whatsappBtn" onclick="App.payAndExport('whatsapp')">💬 WhatsApp (KES 5)</button>
   </div>
   
   <div class="helper-text">
     <span>🎁 3 Free calculations for new users</span>
     <span>💰 Pay per use - KES 5 per calculation</span>
-    <span>📄 PDF - KES 5</span>
-    <span>💬 WhatsApp - KES 5</span>
     <span>💾 Credits saved permanently on server</span>
-  </div>
-
-  <div class="premium-footer">
-    <p>
-      🚀 Want unlimited calculations? 
-      <a href="https://play.google.com/store/apps/details?id=com.ericsimiyu.mjengopremium" target="_blank">
-        Get the Premium App
-      </a>
-    </p>
   </div>
 </div>
 
@@ -494,15 +421,13 @@ const App = {
           await this.checkWalletBalance();
           
           let creditHtml = '';
-          const actions = ['add_wall', 'add_concrete', 'add_plaster', 'add_painting', 'add_tiling', 'pdf_export', 'whatsapp_share'];
+          const actions = ['add_wall', 'add_concrete', 'add_plaster', 'add_painting', 'add_tiling'];
           const labels = {
             'add_wall': '🧱 Wall',
             'add_concrete': '🧪 Concrete',
             'add_plaster': '🧹 Plaster',
             'add_painting': '🎨 Paint',
-            'add_tiling': '🪠 Tiling',
-            'pdf_export': '📄 PDF',
-            'whatsapp_share': '💬 WhatsApp'
+            'add_tiling': '🪠 Tiling'
           };
           
           for (const action of actions) {
@@ -679,77 +604,7 @@ const App = {
     }
   },
 
-  async payAndExport(action) {
-    const email = this.userEmail || document.getElementById('userEmail').value;
-    
-    if (!email || !email.includes('@')) {
-      alert('⚠️ Please enter a valid email first!');
-      document.getElementById('userEmail').focus();
-      return;
-    }
-
-    const actionMap = {
-      'pdf': 'pdf_export',
-      'whatsapp': 'whatsapp_share'
-    };
-    const actionKey = actionMap[action] || action;
-
-    try {
-      const creditsResponse = await fetch(`/api/check-credits/${encodeURIComponent(email)}/${actionKey}`);
-      const creditsData = await creditsResponse.json();
-      
-      if (!creditsData.verified) {
-        alert('⚠️ Please verify your email first!');
-        this.sendVerification();
-        return;
-      }
-      
-      if (creditsData.freeCredits > 0) {
-        const useResponse = await fetch('/api/use-credit', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email, action: actionKey })
-        });
-        const useData = await useResponse.json();
-        
-        if (useData.success) {
-          if (action === 'pdf') {
-            this.generatePDF();
-          } else if (action === 'whatsapp') {
-            this.shareToWhatsApp();
-          }
-          this.loadUserCredits();
-          this.checkWalletBalance();
-          return;
-        }
-      }
-      
-      if (creditsData.walletBalance >= 5) {
-        const useResponse = await fetch('/api/use-wallet', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email, action: actionKey })
-        });
-        const useData = await useResponse.json();
-        
-        if (useData.success) {
-          if (action === 'pdf') {
-            this.generatePDF();
-          } else if (action === 'whatsapp') {
-            this.shareToWhatsApp();
-          }
-          this.loadUserCredits();
-          this.checkWalletBalance();
-          return;
-        }
-      }
-    } catch (error) {
-      console.error('Error checking wallet:', error);
-    }
-
-    this.initiatePayment(email, actionKey, 5);
-  },
-
+  // ===== INITIATE PAYMENT =====
   initiatePayment(email, action, amount) {
     fetch('/api/initialize-payment', {
       method: 'POST',
@@ -1326,16 +1181,6 @@ const App = {
         { icon: '🪠', name: 'Tiles', qty: tiles, unit: 'boxes' }
       ]
     };
-  },
-
-  // ===== PDF GENERATION =====
-  generatePDF() {
-    alert('📄 PDF generation will include all saved calculations. Coming soon!');
-  },
-
-  // ===== WHATSAPP SHARE =====
-  shareToWhatsApp() {
-    alert('💬 WhatsApp share will include all saved calculations. Coming soon!');
   },
 
   // ===== GET VAL (Helper) =====
