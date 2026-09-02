@@ -28,6 +28,35 @@
       "totalFreeUsed": 11,
       "totalSpent": 0,
       "createdAt": "2026-08-26T12:13:12.530Z"
+    },
+    {
+      "email": "shikanishamjengo@gmail.com",
+      "verified": true,
+      "verificationCode": null,
+      "walletBalance": 0,
+      "freeCredits": {
+        "add_wall": 2,
+        "add_concrete": 3,
+        "add_plaster": 3,
+        "add_rc": 3,
+        "add_roof": 3,
+        "add_painting": 3,
+        "add_tiling": 3,
+        "add_siteworks": 3
+      },
+      "paidCredits": {
+        "add_wall": 0,
+        "add_concrete": 0,
+        "add_plaster": 0,
+        "add_rc": 0,
+        "add_roof": 0,
+        "add_painting": 0,
+        "add_tiling": 0,
+        "add_siteworks": 0
+      },
+      "totalFreeUsed": 1,
+      "totalSpent": 0,
+      "createdAt": "2026-09-01T12:44:55.747Z"
     }
   ],
   "transactions": [
