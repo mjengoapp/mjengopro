@@ -1,0 +1,1829 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>BOQ Pro · Bill of Quantities</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+        body {
+            background: #f0f4fa;
+            margin: 0;
+            padding: 10px;
+            min-height: 100vh;
+        }
+        .app-container {
+            max-width: 100%;
+            background: white;
+            padding: 12px 14px 20px;
+            border-radius: 20px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.06);
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        /* Back to App Button */
+        .back-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        .back-header a {
+            background: #1b3b5c;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.85rem;
+        }
+        .back-header a:hover {
+            background: #0d2d49;
+        }
+        .back-header .user-info {
+            color: #6a8aa8;
+            font-size: 0.8rem;
+        }
+        .back-header .user-info strong {
+            color: #1b3b5c;
+        }
+
+        .company-header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 10px 0;
+            border-bottom: 2px solid #e6edf6;
+            margin-bottom: 4px;
+        }
+        .company-header .logo-placeholder {
+            width: 60px;
+            height: 60px;
+            border: 2px dashed #b0c8e0;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: #b0c8e0;
+            background: #f8faff;
+            cursor: pointer;
+            flex-shrink: 0;
+            position: relative;
+            overflow: hidden;
+        }
+        .company-header .logo-placeholder img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+        .company-header .logo-placeholder input[type="file"] {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            cursor: pointer;
+        }
+        .company-header .company-name {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #0b2b4a;
+        }
+        .company-header .company-name input {
+            border: none;
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #0b2b4a;
+            background: transparent;
+            width: 100%;
+            padding: 4px 0;
+        }
+        .company-header .company-name input:focus {
+            outline: none;
+            border-bottom: 2px solid #2a7de1;
+        }
+        .company-header .premium-badge {
+            margin-left: auto;
+            background: #f44336;
+            color: white;
+            font-size: 0.6rem;
+            padding: 2px 12px;
+            border-radius: 30px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .header-info {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr 1fr;
+            gap: 10px 20px;
+            background: #f8faff;
+            padding: 14px 16px;
+            border-radius: 14px;
+            border: 1px solid #e6edf6;
+        }
+        .header-info .field {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+        .header-info .field label {
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: #4a7a9a;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+        .header-info .field input {
+            border: 1px solid #d6e2f0;
+            border-radius: 8px;
+            padding: 6px 10px;
+            font-size: 0.85rem;
+            background: white;
+            width: 100%;
+            font-weight: 500;
+            color: #0b2b4a;
+        }
+        .header-info .field input:focus {
+            border-color: #2a7de1;
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(42,125,225,0.12);
+        }
+
+        .adjustments {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr 1fr;
+            gap: 10px;
+            background: #f8faff;
+            padding: 12px 16px;
+            border-radius: 14px;
+            border: 1px solid #e6edf6;
+        }
+        .adjustments .field {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+        .adjustments .field label {
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: #4a7a9a;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+        .adjustments .field input {
+            border: 1px solid #d6e2f0;
+            border-radius: 8px;
+            padding: 6px 10px;
+            font-size: 0.85rem;
+            background: white;
+            width: 100%;
+            font-weight: 500;
+        }
+        .adjustments .field input:focus {
+            border-color: #2a7de1;
+            outline: none;
+        }
+        .adjustments .actions {
+            display: flex;
+            gap: 6px;
+            align-items: flex-end;
+            justify-content: flex-end;
+            flex-wrap: wrap;
+        }
+
+        .sticky-total {
+            position: sticky;
+            bottom: 0;
+            background: #1f3a5f;
+            color: white;
+            padding: 10px 16px;
+            border-radius: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 10;
+            margin-top: 10px;
+            box-shadow: 0 -4px 12px rgba(0,0,0,0.15);
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .sticky-total .label {
+            font-size: 0.85rem;
+            opacity: 0.8;
+        }
+        .sticky-total .amount {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #ffd966;
+        }
+        .sticky-total .items-count {
+            font-size: 0.75rem;
+            opacity: 0.7;
+        }
+
+        .nav-panel {
+            background: #f8faff;
+            border-radius: 18px;
+            border: 1px solid #e6edf6;
+            overflow: hidden;
+            max-height: 400px;
+            display: flex;
+            flex-direction: column;
+        }
+        .nav-panel h3 {
+            padding: 12px 16px 10px 16px;
+            margin: 0;
+            color: #0b2b4a;
+            font-size: 1rem;
+            font-weight: 600;
+            border-bottom: 1px solid #e6edf6;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-shrink: 0;
+        }
+        .nav-search {
+            padding: 8px 14px;
+            border-bottom: 1px solid #e6edf6;
+        }
+        .nav-search input {
+            width: 100%;
+            padding: 6px 12px;
+            border: 1px solid #d6e2f0;
+            border-radius: 30px;
+            font-size: 0.8rem;
+            background: white;
+        }
+        .nav-search input:focus {
+            border-color: #2a7de1;
+            outline: none;
+        }
+        .nav-tree-wrapper {
+            overflow-y: auto;
+            flex: 1;
+            padding: 6px 0;
+            -webkit-overflow-scrolling: touch;
+        }
+        .nav-tree {
+            padding: 0;
+        }
+        .tree-item {
+            cursor: pointer;
+            padding: 8px 14px 8px 14px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            border-left: 3px solid transparent;
+            transition: 0.1s;
+            font-size: 0.85rem;
+            min-height: 40px;
+            touch-action: manipulation;
+            flex-wrap: wrap;
+        }
+        .tree-item:active {
+            background: #dce8f8;
+        }
+        .tree-item.level-0 {
+            font-weight: 600;
+            color: #0b2b4a;
+            padding-left: 14px;
+            font-size: 0.9rem;
+        }
+        .tree-item.level-1 {
+            padding-left: 28px;
+            font-weight: 500;
+            color: #1f3a5f;
+            font-size: 0.85rem;
+        }
+        .tree-item.level-2 {
+            padding-left: 42px;
+            font-weight: 400;
+            color: #2a5f8a;
+            font-size: 0.82rem;
+        }
+        .tree-item.level-3 {
+            padding-left: 56px;
+            font-weight: 400;
+            color: #3a6f9a;
+            font-size: 0.78rem;
+        }
+        .tree-item .arrow {
+            font-size: 0.6rem;
+            margin-right: 2px;
+            color: #7a9ac0;
+            width: 16px;
+            text-align: center;
+            flex-shrink: 0;
+        }
+        .tree-item .btn-add-all {
+            margin-left: auto;
+            background: #2a7de1;
+            color: white;
+            border: none;
+            border-radius: 15px;
+            padding: 0 12px;
+            font-size: 11px;
+            cursor: pointer;
+            height: 24px;
+            touch-action: manipulation;
+        }
+        .tree-item .btn-add-all:active {
+            background: #1a5fb0;
+            transform: scale(0.95);
+        }
+        .tree-item .item-count {
+            margin-left: auto;
+            color: #5a7a9a;
+            font-size: 0.65rem;
+            background: #e6edf6;
+            padding: 0 8px;
+            border-radius: 30px;
+            flex-shrink: 0;
+        }
+        .tree-item .sub-items {
+            width: 100%;
+            padding-left: 20px;
+            margin-top: 4px;
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+        }
+        .tree-item .sub-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 6px 10px;
+            background: #f4f9ff;
+            border-radius: 8px;
+            font-size: 0.78rem;
+            font-weight: 400;
+            color: #1f3a5f;
+            gap: 8px;
+            border-left: 2px solid #b0c8e0;
+        }
+        .tree-item .sub-item .btn-add-single {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 15px;
+            padding: 0 12px;
+            font-size: 10px;
+            cursor: pointer;
+            height: 22px;
+            touch-action: manipulation;
+            white-space: nowrap;
+        }
+        .tree-item .sub-item .btn-add-single:active {
+            background: #388E3C;
+            transform: scale(0.95);
+        }
+        .tree-item .sub-item .item-preview {
+            flex: 1;
+            font-size: 0.72rem;
+            color: #1f3a5f;
+            line-height: 1.3;
+        }
+        .tree-item .sub-item .item-unit {
+            color: #5a7a9a;
+            font-size: 0.65rem;
+            flex-shrink: 0;
+            background: #e6edf6;
+            padding: 0 8px;
+            border-radius: 30px;
+        }
+        .expand-all-btn {
+            width: 100%;
+            padding: 8px;
+            border: none;
+            border-top: 1px solid #e6edf6;
+            background: #f8faff;
+            color: #2a5f8a;
+            font-size: 0.75rem;
+            font-weight: 500;
+            cursor: pointer;
+            touch-action: manipulation;
+            flex-shrink: 0;
+        }
+        .expand-all-btn:active {
+            background: #eaf1fb;
+        }
+
+        .boq-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .boq-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .boq-header h2 {
+            margin: 0;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #0b2b4a;
+            flex: 1;
+        }
+        .boq-header .badge {
+            font-size: 0.7rem;
+            color: #4a7a9a;
+            background: #e8eff8;
+            padding: 2px 12px;
+            border-radius: 30px;
+        }
+        .boq-actions {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+        .action-btn {
+            background: #1f3a5f;
+            border: none;
+            color: white;
+            padding: 0 14px;
+            height: 32px;
+            border-radius: 30px;
+            font-weight: 500;
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: 0.1s;
+            border: 1px solid transparent;
+            touch-action: manipulation;
+            white-space: nowrap;
+        }
+        .action-btn:active {
+            transform: scale(0.95);
+        }
+        .action-btn.outline {
+            background: transparent;
+            color: #1f3a5f;
+            border-color: #b0c8e0;
+        }
+        .action-btn.outline:active {
+            background: #e3edf9;
+        }
+        .action-btn.print-btn {
+            background: #2a7de1;
+        }
+        .action-btn.print-btn:active {
+            background: #1a5fb0;
+        }
+        .action-btn.save-btn {
+            background: #4CAF50;
+        }
+        .action-btn.save-btn:active {
+            background: #388E3C;
+        }
+        .action-btn.load-btn {
+            background: #ff9800;
+        }
+        .action-btn.load-btn:active {
+            background: #e68900;
+        }
+        .action-btn.export-btn {
+            background: #9C27B0;
+        }
+        .action-btn.export-btn:active {
+            background: #7B1FA2;
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+            border-radius: 14px;
+            border: 1px solid #e2eaf3;
+            background: white;
+            -webkit-overflow-scrolling: touch;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.78rem;
+            min-width: 600px;
+        }
+        th {
+            background: #e8eff8;
+            color: #1f3a5f;
+            font-weight: 600;
+            padding: 8px 6px;
+            text-align: left;
+            border-bottom: 2px solid #cbdae9;
+            position: sticky;
+            top: 0;
+            z-index: 2;
+            font-size: 0.7rem;
+        }
+        td {
+            padding: 6px 6px;
+            border-bottom: 1px solid #e6edf6;
+            vertical-align: middle;
+        }
+
+        tr.level-0 td {
+            background: #eaf1fb;
+            font-weight: 700;
+            color: #0b2b4a;
+            border-bottom: 2px solid #b8cde0;
+            font-size: 0.85rem;
+            padding: 8px 10px;
+        }
+        tr.level-0 td:first-child {
+            padding-left: 12px;
+        }
+        tr.level-0 td .level-badge {
+            background: #1f3a5f;
+            color: white;
+            padding: 0 10px;
+            border-radius: 30px;
+            font-size: 0.6rem;
+            font-weight: 600;
+            margin-right: 8px;
+        }
+
+        tr.level-1 td {
+            background: #f4f9ff;
+            font-weight: 600;
+            color: #1f3a5f;
+            border-bottom: 1.5px solid #d0ddee;
+            font-size: 0.8rem;
+            padding: 6px 10px;
+        }
+        tr.level-1 td:first-child {
+            padding-left: 24px;
+        }
+        tr.level-1 td .level-badge {
+            background: #4a7a9a;
+            color: white;
+            padding: 0 8px;
+            border-radius: 30px;
+            font-size: 0.55rem;
+            font-weight: 600;
+            margin-right: 8px;
+        }
+
+        tr.level-2 td {
+            background: #fafcff;
+            font-weight: 500;
+            color: #2a5f8a;
+            border-bottom: 1px solid #e0e8f0;
+            font-size: 0.78rem;
+            padding: 5px 10px;
+        }
+        tr.level-2 td:first-child {
+            padding-left: 36px;
+        }
+
+        tr.item-row td {
+            background: white;
+            padding: 8px 6px;
+        }
+        tr.item-row td:first-child {
+            padding-left: 48px;
+        }
+
+        .item-title-input {
+            width: 100%;
+            border: 1px solid #d6e2f0;
+            border-radius: 8px;
+            padding: 4px 8px;
+            font-size: 0.78rem;
+            font-weight: 500;
+            background: white;
+            font-family: inherit;
+        }
+        .item-title-input:focus {
+            border-color: #2a7de1;
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(42,125,225,0.12);
+        }
+        .item-desc-input {
+            width: 100%;
+            border: 1px solid #d6e2f0;
+            border-radius: 8px;
+            padding: 6px 10px;
+            font-size: 0.72rem;
+            background: white;
+            resize: vertical;
+            min-height: 50px;
+            font-family: inherit;
+            line-height: 1.5;
+            height: auto;
+        }
+        .item-desc-input:focus {
+            border-color: #2a7de1;
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(42,125,225,0.12);
+        }
+
+        .editable-input {
+            border: 1px solid #d6e2f0;
+            border-radius: 8px;
+            padding: 3px 6px;
+            width: 100%;
+            min-width: 40px;
+            font-size: 0.75rem;
+            background: white;
+            transition: 0.1s;
+        }
+        .editable-input:focus {
+            border-color: #2a7de1;
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(42,125,225,0.12);
+        }
+        .rate-input {
+            max-width: 80px;
+        }
+        .qty-input {
+            max-width: 70px;
+            text-align: center;
+        }
+        .qty-buttons {
+            display: flex;
+            align-items: center;
+            gap: 3px;
+        }
+        .qty-btn {
+            background: #e8eff8;
+            border: 1px solid #d6e2f0;
+            border-radius: 4px;
+            width: 22px;
+            height: 22px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            touch-action: manipulation;
+            font-weight: 700;
+            color: #1f3a5f;
+        }
+        .qty-btn:active {
+            background: #d0ddee;
+            transform: scale(0.95);
+        }
+        .total-cell {
+            font-weight: 600;
+            color: #0b2b4a;
+            text-align: right;
+            padding-right: 8px;
+            font-size: 0.78rem;
+        }
+        .subtotal-cell {
+            font-weight: 700;
+            color: #0f4a7a;
+            text-align: right;
+            padding-right: 8px;
+            background: inherit;
+            font-size: 0.8rem;
+        }
+        .subtotal-cell.level-0-sub {
+            font-size: 0.9rem;
+            color: #0b2b4a;
+        }
+        .subtotal-cell.level-1-sub {
+            font-size: 0.85rem;
+            color: #1f3a5f;
+        }
+        .remove-btn {
+            background: none;
+            border: none;
+            color: #b71c1c;
+            font-size: 1.1rem;
+            cursor: pointer;
+            padding: 0 4px;
+            opacity: 0.4;
+            touch-action: manipulation;
+            line-height: 1;
+        }
+        .remove-btn:active {
+            opacity: 1;
+            transform: scale(1.2);
+        }
+        .empty-message {
+            text-align: center;
+            color: #6c86a2;
+            padding: 30px 10px;
+            font-style: italic;
+            font-size: 0.85rem;
+        }
+
+        .footer-summary {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            padding: 6px 4px 0;
+            gap: 8px;
+        }
+        .footer-summary .grand-total {
+            font-size: 1.2rem;
+            font-weight: 700;
+            background: #1f3a5f;
+            padding: 6px 20px;
+            border-radius: 40px;
+            color: white;
+        }
+        .footer-summary .grand-total span {
+            color: #ffd966;
+        }
+
+        @media print {
+            body { background: white; padding: 0; }
+            .app-container { box-shadow: none; padding: 10px; }
+            .nav-panel { display: none; }
+            .boq-actions { display: none; }
+            .adjustments { display: none; }
+            .sticky-total { display: none; }
+            .remove-btn { display: none; }
+            .qty-btn { display: none; }
+            .editable-input, .item-title-input, .item-desc-input { border: none; background: transparent; }
+            .table-wrapper { border: 1px solid #ccc; max-height: none; overflow: visible; }
+            th { background: #e8eff8 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            tr.level-0 td { background: #eaf1fb !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            tr.level-1 td { background: #f4f9ff !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            .header-info { border: 1px solid #ccc; }
+            .company-header { border-bottom: 2px solid #ccc; }
+            .footer-summary .grand-total { background: #1f3a5f !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; color: white; }
+            .footer-summary .grand-total span { color: #ffd966; }
+            .back-header { display: none; }
+        }
+
+        @media (max-width: 600px) {
+            body { padding: 6px; }
+            .app-container { padding: 8px 10px 14px; border-radius: 14px; }
+            .header-info { grid-template-columns: 1fr 1fr; gap: 6px; padding: 10px 12px; }
+            .adjustments { grid-template-columns: 1fr 1fr; }
+            .adjustments .actions { grid-column: span 2; justify-content: flex-start; }
+            .company-header .company-name { font-size: 1rem; }
+            .company-header .logo-placeholder { width: 45px; height: 45px; font-size: 18px; }
+            .nav-panel { max-height: 280px; }
+            .tree-item { padding: 6px 10px; font-size: 0.78rem; min-height: 34px; }
+            .tree-item.level-1 { padding-left: 20px; }
+            .tree-item.level-2 { padding-left: 32px; }
+            .tree-item.level-3 { padding-left: 44px; }
+            .tree-item .btn-add-all { font-size: 9px; height: 20px; padding: 0 8px; }
+            .tree-item .sub-item { font-size: 0.7rem; padding: 4px 8px; }
+            .tree-item .sub-item .btn-add-single { font-size: 9px; height: 18px; padding: 0 8px; }
+            .boq-header h2 { font-size: 0.95rem; }
+            .action-btn { font-size: 0.65rem; padding: 0 10px; height: 28px; }
+            table { font-size: 0.7rem; min-width: 450px; }
+            th { font-size: 0.65rem; padding: 5px 4px; }
+            td { padding: 4px 4px; }
+            .editable-input { font-size: 0.68rem; padding: 2px 4px; }
+            .rate-input { max-width: 60px; }
+            .qty-input { max-width: 50px; }
+            .sticky-total { padding: 8px 12px; }
+            .sticky-total .amount { font-size: 1.1rem; }
+            .total-cell { font-size: 0.7rem; }
+            .subtotal-cell { font-size: 0.7rem; }
+            .item-desc-input { font-size: 0.65rem; min-height: 40px; }
+            .item-title-input { font-size: 0.7rem; }
+            tr.item-row td:first-child { padding-left: 30px; }
+            tr.level-1 td:first-child { padding-left: 16px; }
+            tr.level-2 td:first-child { padding-left: 24px; }
+            .qty-btn { width: 18px; height: 18px; font-size: 0.7rem; }
+            .footer-summary .grand-total { font-size: 1rem; padding: 4px 14px; }
+            .back-header { flex-direction: column; gap: 8px; align-items: stretch; text-align: center; }
+        }
+
+        .tree-item, .btn-add-all, .btn-add-single, .action-btn, .remove-btn, .expand-all-btn, .qty-btn {
+            touch-action: manipulation;
+        }
+        input[type="number"] {
+            -moz-appearance: textfield;
+        }
+        input[type="number"]::-webkit-inner-spin-button,
+        input[type="number"]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        #fileInput, #logoInput {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+<div class="app-container">
+    <!-- Back to App Button -->
+    <div class="back-header">
+        <a href="/">← Back to App</a>
+        <span class="user-info">Logged in as: <strong><%= user ? user.email : 'Guest' %></strong></span>
+    </div>
+
+    <!-- Company Header -->
+    <div class="company-header">
+        <div class="logo-placeholder" id="logoPlaceholder">
+            <span id="logoText">🏗️</span>
+            <input type="file" id="logoInput" accept="image/*">
+        </div>
+        <div class="company-name">
+            <input type="text" id="companyName" placeholder="Your Company Name" value="Construction Co. Ltd">
+        </div>
+        <span class="premium-badge">BOQ</span>
+    </div>
+
+    <!-- Header Info -->
+    <div class="header-info">
+        <div class="field">
+            <label>Client</label>
+            <input type="text" id="clientName" placeholder="Enter client name">
+        </div>
+        <div class="field">
+            <label>Project</label>
+            <input type="text" id="projectName" placeholder="Enter project name">
+        </div>
+        <div class="field">
+            <label>Quantity Surveyor</label>
+            <input type="text" id="qsName" placeholder="Enter QS name">
+        </div>
+        <div class="field">
+            <label>Date</label>
+            <input type="date" id="projectDate">
+        </div>
+    </div>
+
+    <!-- Adjustments -->
+    <div class="adjustments">
+        <div class="field">
+            <label>Discount (%)</label>
+            <input type="number" id="discountInput" value="0" min="0" max="100" step="0.5">
+        </div>
+        <div class="field">
+            <label>VAT (%)</label>
+            <input type="number" id="vatInput" value="16" min="0" max="100" step="0.5">
+        </div>
+        <div class="field" style="grid-column: span 2;">
+            <div class="actions">
+                <button class="action-btn print-btn" id="printBtn" style="height:36px; font-size:0.8rem;">🖨️ Print</button>
+                <button class="action-btn save-btn" id="saveBtn" style="height:36px; font-size:0.8rem;">💾 Save</button>
+                <button class="action-btn load-btn" id="loadBtn" style="height:36px; font-size:0.8rem;">📂 Load</button>
+                <button class="action-btn export-btn" id="exportBtn" style="height:36px; font-size:0.8rem;">⬇ Export</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navigation -->
+    <div class="nav-panel">
+        <h3>
+            <span>📂 Structure</span>
+            <span>expand to add items</span>
+        </h3>
+        <div class="nav-search">
+            <input type="text" id="searchInput" placeholder="🔍 Search items...">
+        </div>
+        <div class="nav-tree-wrapper">
+            <div class="nav-tree" id="nav-tree"></div>
+        </div>
+        <button class="expand-all-btn" id="expand-all-btn">▼ Expand all</button>
+    </div>
+
+    <!-- BOQ -->
+    <div class="boq-panel">
+        <div class="boq-header">
+            <h2>📋 Bill of Quantities</h2>
+            <span class="badge" id="item-count-badge">0 items</span>
+            <div class="boq-actions">
+                <button class="action-btn outline" id="clear-all-btn" style="padding:0 12px;">✕</button>
+                <button class="action-btn outline" id="recalc-btn" style="padding:0 12px;">⟳</button>
+            </div>
+        </div>
+
+        <div class="table-wrapper" id="tableWrapper">
+            <table id="boq-table">
+                <thead>
+                    <tr>
+                        <th style="width:32%">Item / Description</th>
+                        <th style="width:10%">Unit</th>
+                        <th style="width:12%">Rate (KES)</th>
+                        <th style="width:12%">Qty</th>
+                        <th style="width:14%">Total (KES)</th>
+                        <th style="width:5%"></th>
+                    </tr>
+                </thead>
+                <tbody id="boq-body">
+                    <tr><td colspan="6" class="empty-message">No items added.<br>Expand the structure and click + Add on any item.</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Sticky Total -->
+        <div class="sticky-total" id="stickyTotal">
+            <div>
+                <div class="label">TOTAL</div>
+                <div class="items-count" id="stickyItemsCount">0 items</div>
+            </div>
+            <div class="amount" id="stickyTotalAmount">KES 0.00</div>
+        </div>
+
+        <div class="footer-summary">
+            <span class="info">Items: <strong id="item-count">0</strong></span>
+            <div class="grand-total">💰 KES <span id="grand-total-value">0.00</span></div>
+        </div>
+    </div>
+</div>
+
+<input type="file" id="fileInput" accept=".json">
+
+<script>
+    // ============= DATA =============
+    const DATA = {
+        substructure: {
+            label: "Substructure",
+            children: {
+                earthworks: {
+                    label: "Earthworks",
+                    children: {
+                        excavations: {
+                            label: "Excavations",
+                            items: [
+                                { id: "e1", title: "Column Foundation Excavation", desc: "Excavate for column foundation trenches not exceeding 1.5m depth including disposal", unit: "m³", rate: 500 },
+                                { id: "e2", title: "Strip Foundation Excavation", desc: "Excavate strip foundations to required depth including trimming and disposal", unit: "m³", rate: 450 }
+                            ]
+                        },
+                        fillings: {
+                            label: "Fillings",
+                            items: [
+                                { id: "f1", title: "Backfilling", desc: "Backfill around foundations with selected excavated material and compact in layers", unit: "m³", rate: 300 },
+                                { id: "f2", title: "Hardcore Filling", desc: "Supply, spread and compact hardcore filling in layers", unit: "m³", rate: 1200 }
+                            ]
+                        },
+                        antitermite: {
+                            label: "Anti-termite",
+                            items: [
+                                { id: "t1", title: "Anti-termite Treatment", desc: "Apply approved anti-termite chemical treatment to all surfaces in contact with soil", unit: "m²", rate: 150 }
+                            ]
+                        }
+                    }
+                },
+                concrete: {
+                    label: "Concrete",
+                    children: {
+                        column_bases: {
+                            label: "Column Bases",
+                            items: [{ id: "c1", title: "Column Bases Concrete", desc: "Supply and place reinforced concrete in column bases (C25)", unit: "m³", rate: 9000 }]
+                        },
+                        strip_footings: {
+                            label: "Strip Footings",
+                            items: [{ id: "c2", title: "Strip Foundation Footings", desc: "Supply and place reinforced concrete in strip footings (C25)", unit: "m³", rate: 8500 }]
+                        },
+                        columns: {
+                            label: "Columns",
+                            items: [{ id: "c3", title: "Concrete Columns", desc: "Supply and cast reinforced concrete columns (C25)", unit: "m³", rate: 9500 }]
+                        },
+                        beams: {
+                            label: "Beams",
+                            items: [{ id: "c4", title: "Concrete Beams", desc: "Supply and cast reinforced concrete beams (C25)", unit: "m³", rate: 9500 }]
+                        },
+                        slabs: {
+                            label: "Slabs",
+                            items: [{ id: "c5", title: "Concrete Slabs", desc: "Supply and cast reinforced concrete slabs (C25)", unit: "m³", rate: 9000 }]
+                        }
+                    }
+                },
+                rebar: {
+                    label: "Reinforcement",
+                    children: {
+                        column_bases: {
+                            label: "Column Bases",
+                            items: [{ id: "r1", title: "Rebar - Column Bases", desc: "Supply, cut, bend and fix reinforcement steel for column bases", unit: "kg", rate: 120 }]
+                        },
+                        beams: {
+                            label: "Beams",
+                            items: [{ id: "r2", title: "Rebar - Beams", desc: "Supply, cut, bend and fix reinforcement steel for beams", unit: "kg", rate: 120 }]
+                        },
+                        slabs: {
+                            label: "Slabs",
+                            items: [{ id: "r3", title: "Rebar - Slabs", desc: "Supply, cut, bend and fix reinforcement steel for slabs", unit: "kg", rate: 115 }]
+                        }
+                    }
+                },
+                formwork: {
+                    label: "Formwork",
+                    children: {
+                        general: {
+                            label: "Formwork",
+                            items: [
+                                { id: "fm1", title: "Formwork to Columns", desc: "Provide and strike formwork to reinforced concrete columns", unit: "m²", rate: 800 },
+                                { id: "fm2", title: "Formwork to Beams", desc: "Provide and strike formwork to reinforced concrete beams", unit: "m²", rate: 850 },
+                                { id: "fm3", title: "Formwork to Slabs", desc: "Provide and strike formwork to reinforced concrete slabs", unit: "m²", rate: 900 }
+                            ]
+                        }
+                    }
+                },
+                walling: {
+                    label: "Walling",
+                    children: {
+                        blocks: {
+                            label: "Block Walling",
+                            items: [{ id: "w1", title: "Block Walling", desc: "Construct 200mm thick block walling in cement sand mortar (1:4)", unit: "m²", rate: 1500 }]
+                        }
+                    }
+                }
+            }
+        },
+        superstructure: {
+            label: "Superstructure",
+            children: {
+                concrete: {
+                    label: "Concrete",
+                    children: {
+                        columns: {
+                            label: "Columns",
+                            items: [{ id: "sc1", title: "Superstructure Columns", desc: "Cast reinforced concrete columns above ground level", unit: "m³", rate: 9800 }]
+                        },
+                        beams: {
+                            label: "Beams",
+                            items: [{ id: "sc2", title: "Superstructure Beams", desc: "Cast reinforced concrete beams above ground level", unit: "m³", rate: 9800 }]
+                        },
+                        slabs: {
+                            label: "Suspended Slabs",
+                            items: [{ id: "sc3", title: "Suspended Slabs", desc: "Cast reinforced suspended slabs", unit: "m³", rate: 9500 }]
+                        }
+                    }
+                },
+                walling: {
+                    label: "Walling",
+                    children: {
+                        blocks: {
+                            label: "Block Walling",
+                            items: [{ id: "sw1", title: "Superstructure Walling", desc: "Construct external and internal block walls", unit: "m²", rate: 1600 }]
+                        }
+                    }
+                },
+                finishes: {
+                    label: "Finishes",
+                    children: {
+                        plaster: {
+                            label: "Plastering",
+                            children: {
+                                wall: {
+                                    label: "Wall",
+                                    items: [{ id: "pf1", title: "Wall Plastering", desc: "Apply 12mm cement sand plaster to walls", unit: "m²", rate: 350 }]
+                                },
+                                ceiling: {
+                                    label: "Ceiling",
+                                    items: [{ id: "pf2", title: "Ceiling Plastering", desc: "Plaster ceiling surfaces to smooth finish", unit: "m²", rate: 400 }]
+                                }
+                            }
+                        },
+                        painting: {
+                            label: "Painting",
+                            children: {
+                                wall: {
+                                    label: "Wall",
+                                    items: [{ id: "pp1", title: "Wall Painting", desc: "Apply 3 coats emulsion paint to walls", unit: "m²", rate: 250 }]
+                                },
+                                ceiling: {
+                                    label: "Ceiling",
+                                    items: [{ id: "pp2", title: "Ceiling Painting", desc: "Apply emulsion paint to ceiling surfaces", unit: "m²", rate: 220 }]
+                                }
+                            }
+                        },
+                        tiling: {
+                            label: "Tiling",
+                            children: {
+                                floor: {
+                                    label: "Floor Tiling",
+                                    items: [{ id: "pt1", title: "Floor Tiling", desc: "Supply and fix ceramic floor tiles including grout", unit: "m²", rate: 1800 }]
+                                }
+                            }
+                        }
+                    }
+                },
+                roofing: {
+                    label: "Roofing",
+                    children: {
+                        general: {
+                            label: "Roofing",
+                            items: [{ id: "rf1", title: "Roofing Works", desc: "Supply and install roof structure and covering", unit: "m²", rate: 2500 }]
+                        }
+                    }
+                },
+                fittings: {
+                    label: "Fittings",
+                    children: {
+                        doors: {
+                            label: "Doors",
+                            items: [{ id: "ft1", title: "Doors Installation", desc: "Supply and fix standard timber or metal doors", unit: "No", rate: 8000 }]
+                        },
+                        windows: {
+                            label: "Windows",
+                            items: [{ id: "ft2", title: "Windows Installation", desc: "Supply and fix aluminium or steel windows", unit: "No", rate: 6000 }]
+                        }
+                    }
+                },
+                services: {
+                    label: "Services",
+                    children: {
+                        plumbing: {
+                            label: "Plumbing",
+                            items: [{ id: "sv1", title: "Plumbing Works", desc: "Complete plumbing installation works", unit: "Lot", rate: 50000 }]
+                        },
+                        electrical: {
+                            label: "Electrical",
+                            items: [{ id: "sv2", title: "Electrical Works", desc: "Complete electrical installation works", unit: "Lot", rate: 60000 }]
+                        }
+                    }
+                }
+            }
+        }
+    };
+
+    // ============= STATE =============
+    let boqItems = [];
+    let expandedNodes = new Set(['substructure', 'superstructure']);
+    let updateTimeout = null;
+    let searchTerm = '';
+    let logoDataUrl = '';
+
+    // ============= DOM REFS =============
+    const navTree = document.getElementById('nav-tree');
+    const boqBody = document.getElementById('boq-body');
+    const grandTotalSpan = document.getElementById('grand-total-value');
+    const stickyTotalAmount = document.getElementById('stickyTotalAmount');
+    const stickyItemsCount = document.getElementById('stickyItemsCount');
+    const itemCountSpan = document.getElementById('item-count');
+    const countBadge = document.getElementById('item-count-badge');
+    const searchInput = document.getElementById('searchInput');
+    const discountInput = document.getElementById('discountInput');
+    const vatInput = document.getElementById('vatInput');
+    const companyNameInput = document.getElementById('companyName');
+
+    // ============= LOCAL STORAGE =============
+    function loadFromStorage() {
+        try {
+            const saved = localStorage.getItem('boqData');
+            if (saved) {
+                const data = JSON.parse(saved);
+                if (data.items) boqItems = data.items;
+                if (data.companyName) companyNameInput.value = data.companyName;
+                if (data.clientName) document.getElementById('clientName').value = data.clientName;
+                if (data.projectName) document.getElementById('projectName').value = data.projectName;
+                if (data.qsName) document.getElementById('qsName').value = data.qsName;
+                if (data.projectDate) document.getElementById('projectDate').value = data.projectDate;
+                if (data.discount) discountInput.value = data.discount;
+                if (data.vat) vatInput.value = data.vat;
+                if (data.logo) {
+                    logoDataUrl = data.logo;
+                    const placeholder = document.getElementById('logoPlaceholder');
+                    placeholder.innerHTML = `<img src="${logoDataUrl}" alt="Logo">`;
+                }
+                return true;
+            }
+        } catch(e) { console.warn('Failed to load from storage:', e); }
+        return false;
+    }
+
+    function saveToStorage() {
+        try {
+            const data = {
+                items: boqItems,
+                companyName: companyNameInput.value,
+                clientName: document.getElementById('clientName').value,
+                projectName: document.getElementById('projectName').value,
+                qsName: document.getElementById('qsName').value,
+                projectDate: document.getElementById('projectDate').value,
+                discount: discountInput.value,
+                vat: vatInput.value,
+                logo: logoDataUrl,
+                savedAt: new Date().toISOString()
+            };
+            localStorage.setItem('boqData', JSON.stringify(data));
+        } catch(e) { console.warn('Failed to save to storage:', e); }
+    }
+
+    // ============= HELPERS =============
+    function formatMoney(value) {
+        return 'KES ' + Number(value).toLocaleString('en-KE', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        });
+    }
+
+    function getNode(path) {
+        let parts = path.split('.');
+        let current = DATA;
+        for (let p of parts) {
+            if (current && current.children && current.children[p]) {
+                current = current.children[p];
+            } else if (current && current[p]) {
+                current = current[p];
+            } else {
+                return null;
+            }
+        }
+        return current;
+    }
+
+    function getAllItems(node) {
+        let result = [];
+        if (node.items) {
+            result = result.concat(node.items);
+        }
+        if (node.children) {
+            for (let key in node.children) {
+                result = result.concat(getAllItems(node.children[key]));
+            }
+        }
+        return result;
+    }
+
+    function getLevels(path) {
+        let parts = path.split('.');
+        let levels = [];
+        let current = DATA;
+        for (let p of parts) {
+            if (current && current.children && current.children[p]) {
+                current = current.children[p];
+                if (current.label) levels.push(current.label);
+            } else if (current && current[p]) {
+                current = current[p];
+                if (current.label) levels.push(current.label);
+            } else {
+                break;
+            }
+        }
+        return levels;
+    }
+
+    function generateId() {
+        return 'item_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6);
+    }
+
+    // ============= DUPLICATE CHECK =============
+    function isItemDuplicate(item, levels) {
+        return boqItems.some(existing => 
+            existing.title === item.title && 
+            existing.levels.join() === levels.join()
+        );
+    }
+
+    // ============= CALCULATE TOTALS =============
+    function calculateTotals() {
+        let subtotal = 0;
+        boqItems.forEach(item => {
+            subtotal += (item.rate || 0) * (item.qty || 0);
+        });
+
+        const discount = parseFloat(discountInput.value) || 0;
+        const vat = parseFloat(vatInput.value) || 0;
+
+        let afterDiscount = subtotal - (subtotal * discount / 100);
+        let afterVat = afterDiscount + (afterDiscount * vat / 100);
+
+        return {
+            subtotal: subtotal,
+            discount: discount,
+            vat: vat,
+            discountAmount: subtotal * discount / 100,
+            vatAmount: afterDiscount * vat / 100,
+            grandTotal: afterVat,
+            itemCount: boqItems.length
+        };
+    }
+
+    function updateTotals() {
+        const totals = calculateTotals();
+        grandTotalSpan.textContent = formatMoney(totals.grandTotal);
+        stickyTotalAmount.textContent = formatMoney(totals.grandTotal);
+        stickyItemsCount.textContent = totals.itemCount + ' items';
+        itemCountSpan.textContent = totals.itemCount;
+        countBadge.textContent = totals.itemCount + ' items';
+        saveToStorage();
+    }
+
+    // ============= RENDER TREE =============
+    function renderTree() {
+        navTree.innerHTML = '';
+        let keys = Object.keys(DATA);
+        keys.forEach(key => {
+            let node = DATA[key];
+            let path = key;
+            let isExpanded = expandedNodes.has(path);
+
+            let div = document.createElement('div');
+            div.className = 'tree-item level-0';
+
+            let arrow = document.createElement('span');
+            arrow.className = 'arrow';
+            arrow.textContent = isExpanded ? '▼' : '▶';
+            div.appendChild(arrow);
+
+            let label = document.createElement('span');
+            label.textContent = node.label;
+            div.appendChild(label);
+
+            let count = getAllItems(node).length;
+            if (count > 0) {
+                let badge = document.createElement('span');
+                badge.className = 'item-count';
+                badge.textContent = count;
+                div.appendChild(badge);
+            }
+
+            div.addEventListener('click', function(e) {
+                if (e.target.closest('.btn-add-all') || e.target.closest('.btn-add-single')) return;
+                if (expandedNodes.has(path)) {
+                    expandedNodes.delete(path);
+                } else {
+                    expandedNodes.add(path);
+                }
+                renderTree();
+            });
+
+            navTree.appendChild(div);
+
+            if (isExpanded) {
+                let container = document.createElement('div');
+                container.style.paddingLeft = '0px';
+                navTree.appendChild(container);
+                buildTree(container, node, path, 1);
+            }
+        });
+    }
+
+    function buildTree(parent, node, path, level) {
+        let keys = Object.keys(node.children || {});
+        keys.sort();
+
+        keys.forEach(key => {
+            let child = node.children[key];
+            let fullPath = path + '.' + key;
+            let hasChildren = child.children && Object.keys(child.children).length > 0;
+            let hasItems = child.items && child.items.length > 0;
+            let isExpanded = expandedNodes.has(fullPath);
+
+            let show = true;
+            if (searchTerm) {
+                let found = false;
+                if (child.label && child.label.toLowerCase().includes(searchTerm)) found = true;
+                if (child.items) {
+                    child.items.forEach(item => {
+                        if (item.title.toLowerCase().includes(searchTerm)) found = true;
+                        if (item.desc && item.desc.toLowerCase().includes(searchTerm)) found = true;
+                    });
+                }
+                show = found;
+            }
+            if (!show) return;
+
+            let div = document.createElement('div');
+            div.className = 'tree-item level-' + level;
+
+            if (hasChildren) {
+                let arrow = document.createElement('span');
+                arrow.className = 'arrow';
+                arrow.textContent = isExpanded ? '▼' : '▶';
+                div.appendChild(arrow);
+            } else {
+                let spacer = document.createElement('span');
+                spacer.style.width = '14px';
+                spacer.style.display = 'inline-block';
+                div.appendChild(spacer);
+            }
+
+            let label = document.createElement('span');
+            label.textContent = child.label;
+            div.appendChild(label);
+
+            if (hasItems) {
+                let btn = document.createElement('button');
+                btn.className = 'btn-add-all';
+                btn.textContent = '+ All';
+                btn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    addCategory(fullPath);
+                });
+                div.appendChild(btn);
+
+                let items = child.items || [];
+                if (items.length > 0) {
+                    let badge = document.createElement('span');
+                    badge.className = 'item-count';
+                    badge.textContent = items.length;
+                    div.appendChild(badge);
+                }
+
+                if (isExpanded || level <= 1) {
+                    let sub = document.createElement('div');
+                    sub.className = 'sub-items';
+                    child.items.forEach(item => {
+                        let row = document.createElement('div');
+                        row.className = 'sub-item';
+
+                        let name = document.createElement('span');
+                        name.className = 'item-preview';
+                        name.textContent = item.title;
+                        row.appendChild(name);
+
+                        let unit = document.createElement('span');
+                        unit.className = 'item-unit';
+                        unit.textContent = item.unit;
+                        row.appendChild(unit);
+
+                        let btn2 = document.createElement('button');
+                        btn2.className = 'btn-add-single';
+                        btn2.textContent = '+ Add';
+                        btn2.addEventListener('click', function(e) {
+                            e.stopPropagation();
+                            addSingle(item, fullPath);
+                        });
+                        row.appendChild(btn2);
+
+                        sub.appendChild(row);
+                    });
+                    div.appendChild(sub);
+                }
+            }
+
+            div.addEventListener('click', function(e) {
+                if (e.target.closest('.btn-add-all') || e.target.closest('.btn-add-single')) return;
+                if (hasChildren) {
+                    if (expandedNodes.has(fullPath)) {
+                        expandedNodes.delete(fullPath);
+                    } else {
+                        expandedNodes.add(fullPath);
+                    }
+                    renderTree();
+                }
+            });
+
+            parent.appendChild(div);
+
+            if (hasChildren && isExpanded) {
+                let container = document.createElement('div');
+                container.style.paddingLeft = '0px';
+                parent.appendChild(container);
+                buildTree(container, child, fullPath, level + 1);
+            }
+        });
+    }
+
+    // ============= ADD ITEMS WITH DUPLICATE CHECK =============
+    function addSingle(item, path) {
+        let levels = getLevels(path);
+        
+        if (isItemDuplicate(item, levels)) {
+            let existing = boqItems.find(i => i.title === item.title && i.levels.join() === levels.join());
+            if (existing) {
+                existing.qty = (existing.qty || 1) + 1;
+                renderTable();
+            }
+            return;
+        }
+        
+        boqItems.push({
+            id: generateId(),
+            title: item.title,
+            description: item.desc || item.description || '',
+            unit: item.unit || 'unit',
+            rate: item.rate || 0,
+            qty: 1,
+            levels: levels,
+            createdAt: new Date().toISOString()
+        });
+        renderTable();
+    }
+
+    function addCategory(path) {
+        let node = getNode(path);
+        if (!node) return;
+        let allItems = getAllItems(node);
+        let levels = getLevels(path);
+
+        allItems.forEach(item => {
+            if (isItemDuplicate(item, levels)) {
+                let existing = boqItems.find(i => i.title === item.title && i.levels.join() === levels.join());
+                if (existing) {
+                    existing.qty = (existing.qty || 1) + 1;
+                }
+            } else {
+                boqItems.push({
+                    id: generateId(),
+                    title: item.title,
+                    description: item.desc || item.description || '',
+                    unit: item.unit || 'unit',
+                    rate: item.rate || 0,
+                    qty: 1,
+                    levels: levels,
+                    createdAt: new Date().toISOString()
+                });
+            }
+        });
+        renderTable();
+    }
+
+    // ============= RENDER TABLE =============
+    function renderTable() {
+        if (boqItems.length === 0) {
+            boqBody.innerHTML = '<tr><td colspan="6" class="empty-message">No items added.<br>Expand the structure and click + Add on any item.</td></tr>';
+            updateTotals();
+            return;
+        }
+
+        let hierarchy = {};
+        boqItems.forEach(item => {
+            let levels = item.levels || ['General'];
+            let current = hierarchy;
+            levels.forEach((level, idx) => {
+                if (!current[level]) {
+                    current[level] = { label: level, level: idx, items: [], children: {} };
+                }
+                if (idx === levels.length - 1) {
+                    current[level].items.push(item);
+                }
+                current = current[level].children;
+            });
+        });
+
+        let html = '';
+
+        function renderLevel(node, level) {
+            let keys = Object.keys(node).sort();
+            keys.forEach(key => {
+                let child = node[key];
+                let childLevel = child.level || level;
+                let itemsList = child.items || [];
+                let hasChildren = Object.keys(child.children || {}).length > 0;
+
+                let subtotal = 0;
+                itemsList.forEach(item => {
+                    subtotal += (item.rate || 0) * (item.qty || 0);
+                });
+                if (hasChildren) {
+                    let childKeys = Object.keys(child.children || {});
+                    childKeys.forEach(ck => {
+                        let gc = child.children[ck];
+                        if (gc.items) {
+                            gc.items.forEach(item => {
+                                subtotal += (item.rate || 0) * (item.qty || 0);
+                            });
+                        }
+                    });
+                }
+
+                let cls = '';
+                let badge = '';
+                let pad = 12 + (childLevel * 12);
+                if (childLevel === 0) {
+                    cls = 'level-0';
+                    badge = '📁 ';
+                    pad = 12;
+                } else if (childLevel === 1) {
+                    cls = 'level-1';
+                    badge = '▸ ';
+                    pad = 24;
+                } else {
+                    cls = 'level-2';
+                    badge = '';
+                    pad = 36;
+                }
+
+                let subCls = childLevel === 0 ? 'level-0-sub' : (childLevel === 1 ? 'level-1-sub' : '');
+
+                html += `<tr class="${cls}">
+                    <td style="padding-left:${pad}px;">${badge}${key} ${itemsList.length > 0 ? `<span style="font-weight:400;font-size:11px;color:#5a7a9a;">(${itemsList.length})</span>` : ''}</td>
+                    <td></td><td></td><td></td>
+                    <td class="subtotal-cell ${subCls}">${formatMoney(subtotal)}</td>
+                    <td></td>
+                </tr>`;
+
+                itemsList.forEach((item) => {
+                    let total = (item.rate || 0) * (item.qty || 0);
+                    let ipad = pad + 12;
+                    html += `<tr class="item-row" data-id="${item.id}">
+                        <td style="padding-left:${ipad}px;">
+                            <div style="display:flex; flex-direction:column; gap:3px;">
+                                <input type="text" class="item-title-input" data-field="title" value="${esc(item.title)}" data-id="${item.id}">
+                                <textarea class="item-desc-input" data-field="description" rows="2" data-id="${item.id}">${esc(item.description)}</textarea>
+                            </div>
+                        </td>
+                        <td><input type="text" class="editable-input" data-field="unit" value="${esc(item.unit)}" style="max-width:70px;" data-id="${item.id}"></td>
+                        <td><input type="number" class="editable-input rate-input" data-field="rate" value="${item.rate}" step="any" min="0" data-id="${item.id}"></td>
+                        <td>
+                            <div class="qty-buttons">
+                                <button class="qty-btn" data-id="${item.id}" data-delta="-1">−</button>
+                                <input type="number" class="editable-input qty-input" data-field="qty" value="${item.qty}" step="1" min="0" data-id="${item.id}">
+                                <button class="qty-btn" data-id="${item.id}" data-delta="1">+</button>
+                            </div>
+                        </td>
+                        <td class="total-cell">${formatMoney(total)}</td>
+                        <td><button class="remove-btn" data-id="${item.id}">✕</button></td>
+                    </tr>`;
+                });
+
+                if (hasChildren) {
+                    renderLevel(child.children, childLevel + 1);
+                }
+            });
+        }
+
+        renderLevel(hierarchy, 0);
+        boqBody.innerHTML = html;
+        updateTotals();
+        attachEvents();
+    }
+
+    function esc(text) {
+        if (!text) return '';
+        return String(text).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    // ============= EVENTS =============
+    function attachEvents() {
+        document.querySelectorAll('.remove-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                let id = this.getAttribute('data-id');
+                let idx = boqItems.findIndex(i => i.id === id);
+                if (idx !== -1) {
+                    boqItems.splice(idx, 1);
+                    renderTable();
+                }
+            });
+        });
+
+        document.querySelectorAll('.qty-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                let id = this.getAttribute('data-id');
+                let delta = parseInt(this.getAttribute('data-delta'));
+                let item = boqItems.find(i => i.id === id);
+                if (item) {
+                    item.qty = Math.max(0, (item.qty || 0) + delta);
+                    renderTable();
+                }
+            });
+        });
+
+        document.querySelectorAll('.item-title-input, .item-desc-input, .editable-input').forEach(input => {
+            input.addEventListener('change', function() {
+                let id = this.getAttribute('data-id');
+                let field = this.getAttribute('data-field');
+                let val = this.value;
+                if (field === 'rate' || field === 'qty') {
+                    val = parseFloat(val) || 0;
+                    if (val < 0) val = 0;
+                }
+                let item = boqItems.find(i => i.id === id);
+                if (item) {
+                    item[field] = val;
+                    clearTimeout(updateTimeout);
+                    updateTimeout = setTimeout(() => {
+                        renderTable();
+                    }, 300);
+                }
+            });
+        });
+    }
+
+    // ============= SEARCH =============
+    searchInput.addEventListener('input', function() {
+        searchTerm = this.value.toLowerCase().trim();
+        renderTree();
+    });
+
+    // ============= ACTIONS =============
+    document.getElementById('clear-all-btn').addEventListener('click', function() {
+        if (boqItems.length === 0) return;
+        if (confirm('Remove all items from BOQ?')) {
+            boqItems = [];
+            renderTable();
+        }
+    });
+
+    document.getElementById('recalc-btn').addEventListener('click', function() {
+        renderTable();
+    });
+
+    document.getElementById('expand-all-btn').addEventListener('click', function() {
+        function collect(node, path) {
+            if (node.children) {
+                for (let key in node.children) {
+                    let p = path ? path + '.' + key : key;
+                    expandedNodes.add(p);
+                    collect(node.children[key], p);
+                }
+            }
+        }
+        for (let key in DATA) {
+            expandedNodes.add(key);
+            collect(DATA[key], key);
+        }
+        renderTree();
+    });
+
+    // ============= SAVE / LOAD / EXPORT =============
+    document.getElementById('saveBtn').addEventListener('click', function() {
+        saveToStorage();
+        alert('✅ BOQ saved successfully! Data is stored in your browser.');
+    });
+
+    document.getElementById('loadBtn').addEventListener('click', function() {
+        document.getElementById('fileInput').click();
+    });
+
+    document.getElementById('exportBtn').addEventListener('click', function() {
+        const data = {
+            company: companyNameInput.value,
+            client: document.getElementById('clientName').value,
+            project: document.getElementById('projectName').value,
+            qs: document.getElementById('qsName').value,
+            date: document.getElementById('projectDate').value,
+            discount: discountInput.value,
+            vat: vatInput.value,
+            items: boqItems,
+            exportedAt: new Date().toISOString()
+        };
+        const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `BOQ_${data.project || 'project'}_${new Date().toISOString().slice(0,10)}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+    });
+
+    document.getElementById('fileInput').addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            try {
+                const data = JSON.parse(e.target.result);
+                if (data.items && Array.isArray(data.items)) {
+                    boqItems = data.items;
+                    if (data.client) document.getElementById('clientName').value = data.client;
+                    if (data.project) document.getElementById('projectName').value = data.project;
+                    if (data.qs) document.getElementById('qsName').value = data.qs;
+                    if (data.date) document.getElementById('projectDate').value = data.date;
+                    if (data.discount) discountInput.value = data.discount;
+                    if (data.vat) vatInput.value = data.vat;
+                    if (data.company) companyNameInput.value = data.company;
+                    renderTable();
+                    saveToStorage();
+                    alert('✅ BOQ loaded successfully!');
+                } else {
+                    alert('❌ Invalid file format');
+                }
+            } catch(err) {
+                alert('❌ Error loading file: ' + err.message);
+            }
+        };
+        reader.readAsText(file);
+        this.value = '';
+    });
+
+    // ============= LOGO UPLOAD =============
+    document.getElementById('logoInput').addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            logoDataUrl = e.target.result;
+            const placeholder = document.getElementById('logoPlaceholder');
+            placeholder.innerHTML = `<img src="${logoDataUrl}" alt="Logo">`;
+            saveToStorage();
+        };
+        reader.readAsDataURL(file);
+    });
+
+    // ============= PRINT =============
+    document.getElementById('printBtn').addEventListener('click', function() {
+        window.print();
+    });
+
+    // ============= VAT & DISCOUNT CHANGE =============
+    discountInput.addEventListener('change', updateTotals);
+    vatInput.addEventListener('change', updateTotals);
+
+    // ============= AUTO-SAVE =============
+    document.querySelectorAll('.header-info input, .company-header input').forEach(input => {
+        input.addEventListener('change', saveToStorage);
+    });
+
+    // ============= INIT =============
+    document.getElementById('projectDate').value = new Date().toISOString().split('T')[0];
+
+    const loaded = loadFromStorage();
+    renderTree();
+    renderTable();
+
+    if (!loaded) {
+        saveToStorage();
+    }
+
+    console.log('🏗️ BOQ Pro loaded successfully');
+    console.log('📊 Items:', boqItems.length);
+</script>
+</body>
+</html>

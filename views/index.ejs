@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-  <title>Mjengo Pro · Pay-Per-Use</title>
+  <title>Mjengo Pro · Construction Calculator</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://js.paystack.co/v1/inline.js"></script>
@@ -11,14 +11,161 @@
     * { box-sizing: border-box; font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif; -webkit-tap-highlight-color: transparent; }
     body { margin: 0; padding: 12px; background: #f0f4f8; color: #0b1a2e; min-height: 100vh; }
     .card { max-width: 100%; margin: 0 auto; background: white; padding: 20px 16px 28px; border-radius: 28px; box-shadow: 0 8px 30px rgba(0,0,0,0.06); }
-    h2 { font-size: 1.1rem; font-weight: 600; margin: 1.2rem 0 0.6rem; color: #0b2b44; border-bottom: 2px solid #eef2f6; padding-bottom: 0.4rem; }
-    h3 { font-weight: 500; font-size: 0.95rem; margin: 0.25rem 0; color: #1e3b5a; }
-    h4 { font-weight: 600; font-size: 0.85rem; margin: 0.5rem 0 0.25rem; color: #1e3b5a; }
-    .header-bar { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; margin-bottom: 8px; gap: 8px; }
-    .header-bar h2 { margin: 0; border: none; padding: 0; font-size: 1.2rem; }
-    .badge { background: #e8f0fe; color: #1a5fa8; padding: 4px 14px; border-radius: 40px; font-size: 0.7rem; font-weight: 600; letter-spacing: 0.3px; white-space: nowrap; }
-    
-    .tabs-wrapper { 
+
+    /* ===== LOGIN / REGISTER STYLES ===== */
+    .auth-container {
+      max-width: 420px;
+      margin: 0 auto;
+      padding: 20px 0;
+    }
+    .auth-container .logo {
+      text-align: center;
+      font-size: 2.5rem;
+      margin-bottom: 4px;
+    }
+    .auth-container h2 {
+      text-align: center;
+      font-size: 1.5rem;
+      color: #0b2b44;
+      margin-bottom: 4px;
+      border: none;
+    }
+    .auth-container .subtitle {
+      text-align: center;
+      color: #5a7a95;
+      font-size: 0.95rem;
+      margin-bottom: 24px;
+    }
+    .auth-tabs {
+      display: flex;
+      background: #f2f6fc;
+      border-radius: 14px;
+      padding: 4px;
+      margin-bottom: 20px;
+    }
+    .auth-tabs button {
+      flex: 1;
+      padding: 10px;
+      border: none;
+      background: transparent;
+      border-radius: 12px;
+      font-weight: 600;
+      font-size: 0.95rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      color: #5a7a95;
+    }
+    .auth-tabs button.active {
+      background: white;
+      color: #1b3b5c;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+    .auth-form {
+      display: none;
+    }
+    .auth-form.active {
+      display: block;
+    }
+    .auth-form .form-group {
+      margin-bottom: 14px;
+    }
+    .auth-form label {
+      display: block;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #1b3b5c;
+      margin-bottom: 4px;
+    }
+    .auth-form input {
+      width: 100%;
+      height: 48px;
+      padding: 0 16px;
+      border: 2px solid #d7dfe9;
+      border-radius: 12px;
+      font-size: 16px;
+      background: white;
+      transition: all 0.15s;
+    }
+    .auth-form input:focus {
+      outline: none;
+      border-color: #2c7be0;
+      box-shadow: 0 0 0 3px rgba(44,123,224,0.12);
+    }
+    .auth-form .btn-auth {
+      width: 100%;
+      padding: 14px;
+      background: #1b3b5c;
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-weight: 700;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .auth-form .btn-auth:active { transform: scale(0.97); }
+    .auth-form .btn-auth:disabled { opacity: 0.5; cursor: not-allowed; }
+    .auth-form .btn-auth-secondary {
+      background: transparent;
+      color: #1b3b5c;
+      border: 2px solid #d7dfe9;
+    }
+    .auth-error {
+      background: #ffebee;
+      color: #c62828;
+      padding: 10px 14px;
+      border-radius: 10px;
+      font-size: 0.85rem;
+      margin-bottom: 12px;
+      display: none;
+    }
+    .auth-success {
+      background: #e8f5e9;
+      color: #2e7d32;
+      padding: 10px 14px;
+      border-radius: 10px;
+      font-size: 0.85rem;
+      margin-bottom: 12px;
+      display: none;
+    }
+
+    /* ===== APP STYLES (Logged In) ===== */
+    .app-content { display: none; }
+    .app-content.visible { display: block; }
+
+    .user-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+      padding: 10px 16px;
+      background: #e8f5e9;
+      border-radius: 14px;
+      margin-bottom: 12px;
+    }
+    .user-header .user-info {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.85rem;
+      color: #2e7d32;
+    }
+    .user-header .user-info .email { font-weight: 600; color: #1b3b5c; }
+    .btn-logout {
+      background: none;
+      border: none;
+      color: #c62828;
+      font-weight: 600;
+      font-size: 0.8rem;
+      cursor: pointer;
+      padding: 4px 12px;
+      border-radius: 8px;
+    }
+    .btn-logout:hover { background: #ffebee; }
+
+    /* ===== TABS ===== */
+    .tabs-wrapper {
       position: relative;
       margin: 4px 0 16px;
       border-radius: 16px;
@@ -94,7 +241,7 @@
     .consumed-notice { background: #fff3e0; border: 2px solid #ff9800; padding: 10px 12px; border-radius: 10px; margin: 10px 0; text-align: center; }
     .consumed-notice p { margin: 4px 0; color: #e65100; font-weight: 600; font-size: 0.85rem; }
     .consumed-value { display: inline-block; padding: 4px 12px; background: #e8eef5; border-radius: 6px; font-size: 0.85rem; margin: 2px 4px; color: #333; }
-    .wallet-section { background: #e3f2fd; padding: 12px 16px; border-radius: 14px; margin-top: 8px; border: 2px solid #90caf9; display: none; }
+    .wallet-section { background: #e3f2fd; padding: 12px 16px; border-radius: 14px; margin-top: 8px; border: 2px solid #90caf9; }
     .wallet-section .wallet-row { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; }
     .wallet-section .wallet-info { display: flex; flex-wrap: wrap; gap: 16px; }
     .wallet-section .wallet-info span { font-size: 0.9rem; }
@@ -103,22 +250,32 @@
     .wallet-load-btn:hover { background: #0d2d49; }
     .wallet-load-btn:disabled { opacity: 0.5; cursor: not-allowed; }
     .wallet-hint { font-size: 0.75rem; color: #1a5fa8; margin-top: 4px; }
-    .premium-footer {
-        margin-top: 16px;
-        padding-top: 16px;
-        border-top: 2px solid #eef2f6;
-        text-align: center;
+
+    /* BOQ Button */
+    .boq-btn {
+      background: #2c7be0;
+      color: white;
+      padding: 10px 20px;
+      border-radius: 12px;
+      text-decoration: none;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      border: none;
+      font-size: 0.9rem;
+      transition: all 0.2s;
+      cursor: pointer;
     }
-    .premium-footer p {
-        font-size: 0.85rem;
-        color: #6a8aa8;
-        margin: 0;
+    .boq-btn:hover {
+      background: #1a5fb0;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(44,123,224,0.3);
     }
-    .premium-footer a {
-        color: #1b3b5c;
-        font-weight: 700;
-        text-decoration: underline;
+    .boq-btn:active {
+      transform: scale(0.95);
     }
+
     @media (max-width: 480px) {
       body { padding: 8px; }
       .card { padding: 14px 10px; border-radius: 20px; }
@@ -138,27 +295,88 @@
       .summary-box { grid-column: 1 / -1; }
       .wallet-section .wallet-row { flex-direction: column; align-items: stretch; }
       .wallet-section .wallet-info { flex-direction: column; gap: 4px; }
-      .premium-footer p { font-size: 0.75rem; }
+      .auth-container { padding: 10px 0; }
+      .auth-container h2 { font-size: 1.2rem; }
+      .boq-btn { font-size: 0.8rem; padding: 8px 14px; }
     }
   </style>
 </head>
 <body>
 <div class="card">
-  <div class="header-bar">
-    <h2>🏗️ Mjengo Pro</h2>
-    <span class="badge">💰 Pay-Per-Use</span>
+
+  <!-- ========================================================== -->
+  <!--  AUTH SECTION (Login / Register)                           -->
+  <!-- ========================================================== -->
+  <div id="authSection" class="auth-container">
+    <div class="logo">🏗️</div>
+    <h2>Mjengo Pro</h2>
+    <p class="subtitle">Construction Cost Calculator</p>
+
+    <div id="authError" class="auth-error"></div>
+    <div id="authSuccess" class="auth-success"></div>
+
+    <!-- Auth Tabs -->
+    <div class="auth-tabs">
+      <button class="active" data-tab="login" onclick="App.switchAuthTab('login')">Sign In</button>
+      <button data-tab="register" onclick="App.switchAuthTab('register')">Create Account</button>
+    </div>
+
+    <!-- Login Form -->
+    <div id="loginForm" class="auth-form active">
+      <form onsubmit="App.login(event)">
+        <div class="form-group">
+          <label>📧 Email Address</label>
+          <input type="email" id="loginEmail" placeholder="your@email.com" required>
+        </div>
+        <div class="form-group">
+          <label>🔒 Password</label>
+          <input type="password" id="loginPassword" placeholder="Enter your password" required minlength="6">
+        </div>
+        <button type="submit" class="btn-auth">Sign In</button>
+      </form>
+      <p style="text-align:center; margin-top:12px; font-size:0.8rem; color:#5a7a95;">
+        Don't have an account? <a href="#" onclick="App.switchAuthTab('register'); return false;" style="color:#1b3b5c; font-weight:600;">Create one</a>
+      </p>
+    </div>
+
+    <!-- Register Form -->
+    <div id="registerForm" class="auth-form">
+      <form onsubmit="App.register(event)">
+        <div class="form-group">
+          <label>📧 Email Address</label>
+          <input type="email" id="registerEmail" placeholder="your@email.com" required>
+        </div>
+        <div class="form-group">
+          <label>🔒 Password</label>
+          <input type="password" id="registerPassword" placeholder="Min 6 characters" required minlength="6">
+        </div>
+        <div class="form-group">
+          <label>✅ Confirm Password</label>
+          <input type="password" id="registerConfirm" placeholder="Confirm your password" required minlength="6">
+        </div>
+        <button type="submit" class="btn-auth">Create Account</button>
+      </form>
+      <p style="text-align:center; margin-top:12px; font-size:0.8rem; color:#5a7a95;">
+        Already have an account? <a href="#" onclick="App.switchAuthTab('login'); return false;" style="color:#1b3b5c; font-weight:600;">Sign In</a>
+      </p>
+    </div>
   </div>
 
-  <!-- User Email Input -->
-  <div style="background: #f8faff; padding: 12px 16px; border-radius: 14px; margin-bottom: 12px; border: 2px solid #e8eef5;">
-    <h3 style="margin: 0 0 6px 0;">👤 Your Email</h3>
-    <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-      <input type="email" id="userEmail" placeholder="Enter your email" style="flex: 1; min-width: 150px; height: 44px; padding: 0 12px; border: 2px solid #d7dfe9; border-radius: 14px; font-size: 14px;" value="<%= user ? user.email : '' %>">
-      <button onclick="App.setUser()" style="background: #1b3b5c; color: white; border: none; padding: 10px 20px; border-radius: 14px; font-weight: 600; cursor: pointer;">Set Email</button>
+  <!-- ========================================================== -->
+  <!--  APP SECTION (Logged In)                                   -->
+  <!-- ========================================================== -->
+  <div id="appSection" class="app-content">
+
+    <!-- User Header -->
+    <div class="user-header">
+      <div class="user-info">
+        <span>👤</span>
+        <span class="email" id="userEmailDisplay"></span>
+        <span id="userVerifiedBadge" style="background:#4caf50; color:white; font-size:0.6rem; padding:2px 8px; border-radius:20px;">✓ Verified</span>
+      </div>
+      <button class="btn-logout" onclick="App.logout()">🚪 Logout</button>
     </div>
-    
-    <div id="verificationStatus" style="display: none; margin-top: 8px; padding: 8px 12px; border-radius: 10px;"></div>
-    
+
     <!-- Wallet Section -->
     <div id="walletSection" class="wallet-section">
       <div class="wallet-row">
@@ -170,7 +388,7 @@
       </div>
       <div class="wallet-hint">💡 Each calculation costs KES 5. Load any amount and use as you go!</div>
     </div>
-    
+
     <!-- Credit Summary -->
     <div id="userCreditsSummary" style="display: none; margin-top: 10px; padding-top: 10px; border-top: 2px solid #e8eef5;">
       <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 8px;">
@@ -181,42 +399,49 @@
       </div>
       <div id="userCredits" class="credits-display" style="display: none; margin-top: 8px;"></div>
     </div>
-  </div>
 
-  <!-- ===== SCROLLABLE TABS ===== -->
-  <div class="tabs-wrapper">
-    <div class="tabs" id="tabContainer">
-      <button class="tab-btn active" data-tab="walling" onclick="App.switchTab('walling')">🧱 Walling</button>
-      <button class="tab-btn" data-tab="concrete" onclick="App.switchTab('concrete')">🧪 Concrete</button>
-      <button class="tab-btn" data-tab="plaster" onclick="App.switchTab('plaster')">🧹 Plaster</button>
-      <button class="tab-btn" data-tab="painting" onclick="App.switchTab('painting')">🎨 Painting</button>
-      <button class="tab-btn" data-tab="tiling" onclick="App.switchTab('tiling')">🪠 Tiling</button>
+    <!-- Tabs -->
+    <div class="tabs-wrapper">
+      <div class="tabs" id="tabContainer">
+        <button class="tab-btn active" data-tab="walling" onclick="App.switchTab('walling')">🧱 Walling</button>
+        <button class="tab-btn" data-tab="concrete" onclick="App.switchTab('concrete')">🧪 Concrete</button>
+        <button class="tab-btn" data-tab="plaster" onclick="App.switchTab('plaster')">🧹 Plaster</button>
+        <button class="tab-btn" data-tab="painting" onclick="App.switchTab('painting')">🎨 Painting</button>
+        <button class="tab-btn" data-tab="tiling" onclick="App.switchTab('tiling')">🪠 Tiling</button>
+      </div>
+    </div>
+    <div class="scroll-hint">← swipe to see more →</div>
+
+    <!-- ===== BOQ BUTTON ===== -->
+    <div style="display: flex; gap: 8px; margin: 8px 0 12px 0; flex-wrap: wrap;">
+      <a href="/boq" class="boq-btn">
+        📋 Bill of Quantities
+      </a>
+    </div>
+
+    <!-- All Tabs -->
+    <div id="tab-walling" class="tab-content active"><div id="walling-container"></div><button class="add-item-btn-pay" id="add-walling-btn" onclick="App.addItemWithPayment('walling')">💰 Add Wall</button><div class="combined-total"><span class="label">🧱 Combined Walling Total</span><span class="amount" id="walling-combined-total">0.00 <small>currency</small></span></div></div>
+    <div id="tab-concrete" class="tab-content"><div id="concrete-container"></div><button class="add-item-btn-pay" id="add-concrete-btn" onclick="App.addItemWithPayment('concrete')">💰 Add Concrete</button><div class="combined-total"><span class="label">🧪 Combined Concrete Total</span><span class="amount" id="concrete-combined-total">0.00 <small>currency</small></span></div></div>
+    <div id="tab-plaster" class="tab-content"><div id="plaster-container"></div><button class="add-item-btn-pay" id="add-plaster-btn" onclick="App.addItemWithPayment('plaster')">💰 Add Plaster</button><div class="combined-total"><span class="label">🧹 Combined Plaster Total</span><span class="amount" id="plaster-combined-total">0.00 <small>currency</small></span></div></div>
+    <div id="tab-painting" class="tab-content"><div id="painting-container"></div><button class="add-item-btn-pay" id="add-painting-btn" onclick="App.addItemWithPayment('painting')">💰 Add Painting Job</button><div class="combined-total"><span class="label">🎨 Combined Painting Total</span><span class="amount" id="painting-combined-total">0.00 <small>currency</small></span></div></div>
+    <div id="tab-tiling" class="tab-content"><div id="tiling-container"></div><button class="add-item-btn-pay" id="add-tiling-btn" onclick="App.addItemWithPayment('tiling')">💰 Add Tiling Job</button><div class="combined-total"><span class="label">🪠 Combined Tiling Total</span><span class="amount" id="tiling-combined-total">0.00 <small>currency</small></span></div></div>
+
+    <div class="subnote">
+      <span>✏️ tap any <strong>Qty</strong> or <strong>Rate</strong> to edit</span>
+    </div>
+
+    <div class="helper-text">
+      <span>🎁 3 Free calculations for new users</span>
+      <span>💰 Pay per use - KES 5 per calculation</span>
+      <span>💾 Credits saved permanently on server</span>
     </div>
   </div>
-  <div class="scroll-hint">← swipe to see more →</div>
 
-  <!-- ===== ALL 5 TABS ===== -->
-  <div id="tab-walling" class="tab-content active"><div id="walling-container"></div><button class="add-item-btn-pay" id="add-walling-btn" onclick="App.addItemWithPayment('walling')">💰 Add Wall</button><div class="combined-total"><span class="label">🧱 Combined Walling Total</span><span class="amount" id="walling-combined-total">0.00 <small>currency</small></span></div></div>
-  <div id="tab-concrete" class="tab-content"><div id="concrete-container"></div><button class="add-item-btn-pay" id="add-concrete-btn" onclick="App.addItemWithPayment('concrete')">💰 Add Concrete</button><div class="combined-total"><span class="label">🧪 Combined Concrete Total</span><span class="amount" id="concrete-combined-total">0.00 <small>currency</small></span></div></div>
-  <div id="tab-plaster" class="tab-content"><div id="plaster-container"></div><button class="add-item-btn-pay" id="add-plaster-btn" onclick="App.addItemWithPayment('plaster')">💰 Add Plaster</button><div class="combined-total"><span class="label">🧹 Combined Plaster Total</span><span class="amount" id="plaster-combined-total">0.00 <small>currency</small></span></div></div>
-  <div id="tab-painting" class="tab-content"><div id="painting-container"></div><button class="add-item-btn-pay" id="add-painting-btn" onclick="App.addItemWithPayment('painting')">💰 Add Painting Job</button><div class="combined-total"><span class="label">🎨 Combined Painting Total</span><span class="amount" id="painting-combined-total">0.00 <small>currency</small></span></div></div>
-  <div id="tab-tiling" class="tab-content"><div id="tiling-container"></div><button class="add-item-btn-pay" id="add-tiling-btn" onclick="App.addItemWithPayment('tiling')">💰 Add Tiling Job</button><div class="combined-total"><span class="label">🪠 Combined Tiling Total</span><span class="amount" id="tiling-combined-total">0.00 <small>currency</small></span></div></div>
-
-  <!-- ===== FOOTER ===== -->
-  <div class="subnote">
-    <span>✏️ tap any <strong>Qty</strong> or <strong>Rate</strong> to edit</span>
-  </div>
-  
-  <div class="helper-text">
-    <span>🎁 3 Free calculations for new users</span>
-    <span>💰 Pay per use - KES 5 per calculation</span>
-    <span>💾 Credits saved permanently on server</span>
-  </div>
 </div>
 
 <script>
 // ============================================================
-//  COMPLETE APP - 5 Calculators + Wallet System + Verification
+//  COMPLETE APP - 5 Calculators + Authentication
 // ============================================================
 
 const App = {
@@ -224,7 +449,8 @@ const App = {
   userEmail: '',
   credits: {},
   isVerified: false,
-  
+  isLoggedIn: false,
+
   actionMap: {
     'walling': 'add_wall',
     'concrete': 'add_concrete',
@@ -232,7 +458,7 @@ const App = {
     'painting': 'add_painting',
     'tiling': 'add_tiling'
   },
-  
+
   calculations: {
     walling: [],
     concrete: [],
@@ -244,10 +470,170 @@ const App = {
   // ===== INIT =====
   init() {
     this.setupAutoSelect();
-    this.loadUserCredits();
-    setTimeout(() => {
-      this.loadCalculations('walling');
-    }, 200);
+    // Check if user is already logged in (from session)
+    this.checkSession();
+  },
+
+  checkSession() {
+    fetch('/api/session')
+      .then(r => r.json())
+      .then(data => {
+        if (data.loggedIn) {
+          this.isLoggedIn = true;
+          this.userEmail = data.email;
+          this.showApp();
+          this.loadUserCredits();
+        } else {
+          this.showAuth();
+        }
+      })
+      .catch(() => {
+        this.showAuth();
+      });
+  },
+
+  showAuth() {
+    document.getElementById('authSection').style.display = 'block';
+    document.getElementById('appSection').classList.remove('visible');
+    this.isLoggedIn = false;
+  },
+
+  showApp() {
+    document.getElementById('authSection').style.display = 'none';
+    document.getElementById('appSection').classList.add('visible');
+    document.getElementById('userEmailDisplay').textContent = this.userEmail;
+    this.isLoggedIn = true;
+  },
+
+  // ===== AUTH TABS =====
+  switchAuthTab(tab) {
+    document.querySelectorAll('.auth-tabs button').forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.tab === tab);
+    });
+    document.getElementById('loginForm').classList.toggle('active', tab === 'login');
+    document.getElementById('registerForm').classList.toggle('active', tab === 'register');
+    this.hideAuthMessages();
+  },
+
+  hideAuthMessages() {
+    document.getElementById('authError').style.display = 'none';
+    document.getElementById('authSuccess').style.display = 'none';
+  },
+
+  showAuthError(msg) {
+    const el = document.getElementById('authError');
+    el.textContent = msg;
+    el.style.display = 'block';
+    document.getElementById('authSuccess').style.display = 'none';
+  },
+
+  showAuthSuccess(msg) {
+    const el = document.getElementById('authSuccess');
+    el.textContent = msg;
+    el.style.display = 'block';
+    document.getElementById('authError').style.display = 'none';
+  },
+
+  // ===== REGISTER =====
+  async register(e) {
+    e.preventDefault();
+    this.hideAuthMessages();
+
+    const email = document.getElementById('registerEmail').value.trim();
+    const password = document.getElementById('registerPassword').value;
+    const confirm = document.getElementById('registerConfirm').value;
+
+    if (password !== confirm) {
+      this.showAuthError('Passwords do not match!');
+      return;
+    }
+
+    if (password.length < 6) {
+      this.showAuthError('Password must be at least 6 characters.');
+      return;
+    }
+
+    const btn = e.target.querySelector('.btn-auth');
+    btn.textContent = '⏳ Creating...';
+    btn.disabled = true;
+
+    try {
+      const res = await fetch('/api/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+      });
+      const data = await res.json();
+
+      if (data.success) {
+        this.showAuthSuccess('✅ Account created! Please check your email to verify.');
+        // Auto-login after registration
+        this.userEmail = email;
+        this.showApp();
+        this.loadUserCredits();
+        // Send verification email
+        fetch('/api/send-verification', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email })
+        });
+      } else {
+        this.showAuthError(data.error || 'Registration failed.');
+      }
+    } catch (err) {
+      this.showAuthError('Network error. Please try again.');
+    } finally {
+      btn.textContent = 'Create Account';
+      btn.disabled = false;
+    }
+  },
+
+  // ===== LOGIN =====
+  async login(e) {
+    e.preventDefault();
+    this.hideAuthMessages();
+
+    const email = document.getElementById('loginEmail').value.trim();
+    const password = document.getElementById('loginPassword').value;
+
+    if (!email || !password) {
+      this.showAuthError('Please enter email and password.');
+      return;
+    }
+
+    const btn = e.target.querySelector('.btn-auth');
+    btn.textContent = '⏳ Signing in...';
+    btn.disabled = true;
+
+    try {
+      const res = await fetch('/api/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+      });
+      const data = await res.json();
+
+      if (data.success) {
+        this.userEmail = email;
+        this.showApp();
+        this.loadUserCredits();
+      } else {
+        this.showAuthError(data.error || 'Invalid email or password.');
+      }
+    } catch (err) {
+      this.showAuthError('Network error. Please try again.');
+    } finally {
+      btn.textContent = 'Sign In';
+      btn.disabled = false;
+    }
+  },
+
+  // ===== LOGOUT =====
+  async logout() {
+    await fetch('/api/logout', { method: 'POST' });
+    this.showAuth();
+    document.getElementById('loginEmail').value = '';
+    document.getElementById('loginPassword').value = '';
   },
 
   setupAutoSelect() {
@@ -270,26 +656,21 @@ const App = {
 
   // ===== WALLET FUNCTIONS =====
   async loadWallet() {
-    const email = this.userEmail || document.getElementById('userEmail').value;
-    
-    if (!email || !email.includes('@')) {
-      alert('⚠️ Please enter your email first!');
-      document.getElementById('userEmail').focus();
-      return;
-    }
-    
+    const email = this.userEmail;
+    if (!email) return;
+
     const amount = prompt('💰 Enter amount to load (KES):', '100');
     if (!amount || isNaN(amount) || parseInt(amount) < 10) {
       alert('⚠️ Please enter a valid amount (minimum KES 10)');
       return;
     }
-    
+
     const loadBtn = document.querySelector('.wallet-load-btn');
     if (loadBtn) {
       loadBtn.textContent = '⏳ Processing...';
       loadBtn.disabled = true;
     }
-    
+
     try {
       const response = await fetch('/api/load-wallet', {
         method: 'POST',
@@ -297,7 +678,7 @@ const App = {
         body: JSON.stringify({ email, amount: parseInt(amount) })
       });
       const data = await response.json();
-      
+
       if (data.success) {
         window.location.href = data.authorization_url;
       } else {
@@ -317,19 +698,19 @@ const App = {
   },
 
   async checkWalletBalance() {
-    const email = this.userEmail || document.getElementById('userEmail').value;
+    const email = this.userEmail;
     if (!email) return;
-    
+
     try {
       const response = await fetch(`/api/wallet-balance/${encodeURIComponent(email)}`);
       const data = await response.json();
-      
+
       if (data && data.walletBalance !== undefined) {
         const walletSection = document.getElementById('walletSection');
         walletSection.style.display = 'block';
         document.getElementById('walletBalance').textContent = `KES ${data.walletBalance.toFixed(2)}`;
         document.getElementById('freeCreditCount').textContent = data.freeCredits || 0;
-        
+
         this.updateAddButtonsWithWallet(data);
       }
     } catch (error) {
@@ -339,22 +720,22 @@ const App = {
 
   async updateAddButtonsWithWallet(data) {
     const types = ['walling', 'concrete', 'plaster', 'painting', 'tiling'];
-    const email = this.userEmail || document.getElementById('userEmail').value;
-    
+    const email = this.userEmail;
+
     if (!email) return;
-    
+
     for (const type of types) {
       const btn = document.getElementById(`add-${type}-btn`);
       if (!btn) continue;
-      
+
       try {
         const action = this.actionMap[type] || `add_${type}`;
         const creditsResponse = await fetch(`/api/check-credits/${encodeURIComponent(email)}/${action}`);
         const creditsData = await creditsResponse.json();
-        
+
         const hasFree = creditsData.freeCredits > 0;
         const canAfford = data.walletBalance >= 5;
-        
+
         if (hasFree) {
           btn.disabled = false;
           btn.textContent = `✅ ${type.charAt(0).toUpperCase() + type.slice(1)} (FREE)`;
@@ -376,181 +757,91 @@ const App = {
 
   // ===== USER MANAGEMENT =====
   async loadUserCredits() {
-    const email = document.getElementById('userEmail').value || localStorage.getItem('mjengo_email');
-    if (email) {
-      this.userEmail = email;
-      document.getElementById('userEmail').value = email;
-      localStorage.setItem('mjengo_email', email);
-      
-      try {
-        const response = await fetch(`/api/check-credits/${encodeURIComponent(email)}/add_wall`);
-        const data = await response.json();
-        
-        const statusEl = document.getElementById('verificationStatus');
-        const summaryEl = document.getElementById('userCreditsSummary');
-        
-        if (!data.exists || !data.verified) {
-          statusEl.style.display = 'block';
-          statusEl.style.background = '#fff3e0';
-          statusEl.style.border = '2px solid #ff9800';
-          statusEl.innerHTML = `
-            <p style="margin: 0; color: #e65100;">
-              ⚠️ Please verify your email to get 3 free calculations.
-              <button onclick="App.sendVerification()" style="background: #1b3b5c; color: white; border: none; padding: 4px 12px; border-radius: 6px; margin-left: 8px; cursor: pointer;">
-                Send Verification Email
-              </button>
-            </p>
-          `;
-          summaryEl.style.display = 'none';
-          return;
-        } else {
-          statusEl.style.display = 'none';
-        }
-        
-        const summaryResponse = await fetch(`/api/user-summary/${encodeURIComponent(email)}`);
-        const summaryData = await summaryResponse.json();
-        
-        if (summaryData && summaryData.credits !== undefined) {
-          this.isVerified = true;
-          summaryEl.style.display = 'block';
-          document.getElementById('freeCredits').textContent = summaryData.totalFree || 0;
-          document.getElementById('paidCredits').textContent = summaryData.totalPaid || 0;
-          document.getElementById('totalCredits').textContent = summaryData.totalCredits || 0;
-          document.getElementById('totalSpent').textContent = `KES ${(summaryData.totalSpent || 0).toFixed(2)}`;
-          
-          await this.checkWalletBalance();
-          
-          let creditHtml = '';
-          const actions = ['add_wall', 'add_concrete', 'add_plaster', 'add_painting', 'add_tiling'];
-          const labels = {
-            'add_wall': '🧱 Wall',
-            'add_concrete': '🧪 Concrete',
-            'add_plaster': '🧹 Plaster',
-            'add_painting': '🎨 Paint',
-            'add_tiling': '🪠 Tiling'
-          };
-          
-          for (const action of actions) {
-            const free = summaryData.freeCredits?.[action] || 0;
-            const paid = summaryData.paidCredits?.[action] || 0;
-            const total = free + paid;
-            if (total > 0) {
-              creditHtml += `<span class="credit-item">${labels[action]}: <strong>${total}</strong> (${free} free, ${paid} paid)</span>`;
-            }
-          }
-          
-          const display = document.getElementById('userCredits');
-          if (summaryData.totalCredits > 0) {
-            display.style.display = 'flex';
-            display.innerHTML = creditHtml || `<span>💰 You have ${summaryData.totalCredits} credits</span>`;
-          } else {
-            display.style.display = 'none';
-          }
-        }
-      } catch (error) {
-        console.error('Error loading credits:', error);
-      }
-    }
-  },
+    const email = this.userEmail;
+    if (!email) return;
 
-  sendVerification() {
-    const email = this.userEmail || document.getElementById('userEmail').value;
-    if (!email || !email.includes('@')) {
-      alert('Please enter a valid email address');
-      return;
-    }
-    
-    const btn = event?.target || document.querySelector('#verificationStatus button');
-    if (btn) {
-      btn.textContent = '⏳ Sending...';
-      btn.disabled = true;
-    }
-    
-    fetch('/api/send-verification', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email })
-    })
-    .then(response => response.json())
-    .then(data => {
-      if (data.success) {
-        alert('📧 Verification email sent! Please check your inbox and click the link.');
-        const statusEl = document.getElementById('verificationStatus');
-        if (statusEl) {
-          statusEl.innerHTML = `
-            <p style="margin: 0; color: #2e7d32; background: #e8f5e9; padding: 8px; border-radius: 8px;">
-              ✅ Verification email sent to ${email}. Please check your inbox.
-            </p>
-          `;
-          statusEl.style.background = '#e8f5e9';
-          statusEl.style.border = '2px solid #4caf50';
-        }
-      } else if (data.verified) {
-        alert('✅ Your email is already verified!');
-        this.loadUserCredits();
-      } else {
-        alert('❌ Failed to send verification email: ' + (data.error || 'Please try again.'));
-      }
-    })
-    .catch(error => {
-      alert('❌ Error sending verification: ' + error.message);
-    })
-    .finally(() => {
-      if (btn) {
-        btn.textContent = 'Send Verification Email';
-        btn.disabled = false;
-      }
-    });
-  },
+    try {
+      const response = await fetch(`/api/check-credits/${encodeURIComponent(email)}/add_wall`);
+      const data = await response.json();
 
-  setUser() {
-    const email = document.getElementById('userEmail').value;
-    if (email && email.includes('@')) {
-      this.userEmail = email;
-      localStorage.setItem('mjengo_email', email);
-      
-      fetch(`/api/check-credits/${encodeURIComponent(email)}/add_wall`)
-        .then(r => r.json())
-        .then(data => {
-          if (data.exists && data.verified) {
-            this.loadUserCredits();
-            alert('✅ Email already verified! Loading your credits...');
-          } else if (data.exists && !data.verified) {
-            this.sendVerification();
-          } else {
-            this.sendVerification();
-          }
-        })
-        .catch(() => {
-          this.sendVerification();
+      const summaryEl = document.getElementById('userCreditsSummary');
+
+      if (!data.verified) {
+        summaryEl.style.display = 'none';
+        // Send verification email
+        fetch('/api/send-verification', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email })
         });
-    } else {
-      alert('⚠️ Please enter a valid email address.');
+        alert('📧 Verification email sent! Please check your inbox.');
+        return;
+      }
+
+      const summaryResponse = await fetch(`/api/user-summary/${encodeURIComponent(email)}`);
+      const summaryData = await summaryResponse.json();
+
+      if (summaryData && summaryData.credits !== undefined) {
+        this.isVerified = true;
+        summaryEl.style.display = 'block';
+        document.getElementById('freeCredits').textContent = summaryData.totalFree || 0;
+        document.getElementById('paidCredits').textContent = summaryData.totalPaid || 0;
+        document.getElementById('totalCredits').textContent = summaryData.totalCredits || 0;
+        document.getElementById('totalSpent').textContent = `KES ${(summaryData.totalSpent || 0).toFixed(2)}`;
+
+        await this.checkWalletBalance();
+
+        let creditHtml = '';
+        const actions = ['add_wall', 'add_concrete', 'add_plaster', 'add_painting', 'add_tiling'];
+        const labels = {
+          'add_wall': '🧱 Wall',
+          'add_concrete': '🧪 Concrete',
+          'add_plaster': '🧹 Plaster',
+          'add_painting': '🎨 Paint',
+          'add_tiling': '🪠 Tiling'
+        };
+
+        for (const action of actions) {
+          const free = summaryData.freeCredits?.[action] || 0;
+          const paid = summaryData.paidCredits?.[action] || 0;
+          const total = free + paid;
+          if (total > 0) {
+            creditHtml += `<span class="credit-item">${labels[action]}: <strong>${total}</strong> (${free} free, ${paid} paid)</span>`;
+          }
+        }
+
+        const display = document.getElementById('userCredits');
+        if (summaryData.totalCredits > 0) {
+          display.style.display = 'flex';
+          display.innerHTML = creditHtml || `<span>💰 You have ${summaryData.totalCredits} credits</span>`;
+        } else {
+          display.style.display = 'none';
+        }
+      }
+    } catch (error) {
+      console.error('Error loading credits:', error);
     }
   },
 
   // ===== PAYMENT FUNCTIONS =====
   async addItemWithPayment(type) {
-    const email = this.userEmail || document.getElementById('userEmail').value;
-    
-    if (!email || !email.includes('@')) {
-      alert('⚠️ Please enter a valid email first!');
-      document.getElementById('userEmail').focus();
+    const email = this.userEmail;
+    if (!email) {
+      alert('⚠️ Please login first!');
       return;
     }
 
     const action = this.actionMap[type] || `add_${type}`;
-    
+
     try {
       const creditsResponse = await fetch(`/api/check-credits/${encodeURIComponent(email)}/${action}`);
       const creditsData = await creditsResponse.json();
-      
+
       if (!creditsData.verified) {
-        alert('⚠️ Please verify your email first! Check your inbox for the verification link.');
-        this.sendVerification();
+        alert('⚠️ Please verify your email first! Check your inbox.');
         return;
       }
-      
+
       if (creditsData.freeCredits > 0) {
         const useResponse = await fetch('/api/use-credit', {
           method: 'POST',
@@ -558,7 +849,7 @@ const App = {
           body: JSON.stringify({ email, action })
         });
         const useData = await useResponse.json();
-        
+
         if (useData.success) {
           this.addItem(type);
           this.loadUserCredits();
@@ -566,7 +857,7 @@ const App = {
           return;
         }
       }
-      
+
       if (creditsData.walletBalance >= 5) {
         const useResponse = await fetch('/api/use-wallet', {
           method: 'POST',
@@ -574,7 +865,7 @@ const App = {
           body: JSON.stringify({ email, action })
         });
         const useData = await useResponse.json();
-        
+
         if (useData.success) {
           this.addItem(type);
           this.loadUserCredits();
@@ -604,7 +895,6 @@ const App = {
     }
   },
 
-  // ===== INITIATE PAYMENT =====
   initiatePayment(email, action, amount) {
     fetch('/api/initialize-payment', {
       method: 'POST',
@@ -818,7 +1108,7 @@ const App = {
       painting: this.calcPainting.bind(this),
       tiling: this.calcTiling.bind(this)
     };
-    
+
     const result = calculators[type](block);
     if (result) {
       this.saveCalculation(type, id, result.items);
@@ -1149,7 +1439,7 @@ const App = {
     const tiledLength = tileLength + tileThickness;
     const tiledWidth = tileWidth + tileThickness;
     const tiledArea = (tiledWidth * tiledLength) / 1000000;
-    
+
     const tilesRequired = Math.ceil(area / tiledArea);
     const tiles = Math.ceil(tilesRequired / tileCollection);
     const tilesVolume = (tilesRequired * tileLength * tileWidth * tileThickness) / 1000000000;
