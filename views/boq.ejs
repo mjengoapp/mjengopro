@@ -27,7 +27,53 @@
             gap: 16px;
         }
 
-        /* Back to App Button */
+        /* Credit Banner */
+        .credit-banner {
+            background: linear-gradient(135deg, #1b3b5c, #2a5f8a);
+            color: white;
+            padding: 12px 16px;
+            border-radius: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .credit-banner .credits-info {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        .credit-banner .credit-item {
+            display: flex;
+            flex-direction: column;
+        }
+        .credit-banner .credit-item .label {
+            font-size: 0.65rem;
+            opacity: 0.8;
+            text-transform: uppercase;
+        }
+        .credit-banner .credit-item .value {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #ffd966;
+        }
+        .credit-banner .buy-btn {
+            background: #ffd966;
+            color: #1b3b5c;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 30px;
+            font-weight: 700;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: 0.2s;
+        }
+        .credit-banner .buy-btn:hover {
+            transform: scale(1.05);
+            background: #ffed4a;
+        }
+
         .back-header {
             display: flex;
             justify-content: space-between;
@@ -338,6 +384,10 @@
             background: #1a5fb0;
             transform: scale(0.95);
         }
+        .tree-item .btn-add-all:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
         .tree-item .item-count {
             margin-left: auto;
             color: #5a7a9a;
@@ -383,6 +433,10 @@
         .tree-item .sub-item .btn-add-single:active {
             background: #388E3C;
             transform: scale(0.95);
+        }
+        .tree-item .sub-item .btn-add-single:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
         }
         .tree-item .sub-item .item-preview {
             flex: 1;
@@ -737,6 +791,93 @@
             color: #ffd966;
         }
 
+        /* Modal for Buy Credits */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-overlay.active {
+            display: flex;
+        }
+        .modal {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 400px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        .modal h2 {
+            margin-top: 0;
+            color: #1b3b5c;
+        }
+        .modal .close-btn {
+            float: right;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #999;
+        }
+        .modal .package {
+            background: #f8faff;
+            border: 2px solid #e6edf6;
+            border-radius: 12px;
+            padding: 16px;
+            margin: 12px 0;
+            cursor: pointer;
+            transition: 0.2s;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .modal .package:hover {
+            border-color: #2a7de1;
+            background: #f0f6ff;
+        }
+        .modal .package.selected {
+            border-color: #2a7de1;
+            background: #e8f0fe;
+        }
+        .modal .package .price {
+            font-weight: 700;
+            color: #1b3b5c;
+            font-size: 1.1rem;
+        }
+        .modal .package .desc {
+            font-size: 0.8rem;
+            color: #6a8aa8;
+        }
+        .modal .pay-btn {
+            width: 100%;
+            background: #1b3b5c;
+            color: white;
+            border: none;
+            padding: 14px;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            margin-top: 16px;
+        }
+        .modal .pay-btn:hover {
+            background: #0d2d49;
+        }
+        .modal .pay-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
         @media print {
             body { background: white; padding: 0; }
             .app-container { box-shadow: none; padding: 10px; }
@@ -756,6 +897,8 @@
             .footer-summary .grand-total { background: #1f3a5f !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; color: white; }
             .footer-summary .grand-total span { color: #ffd966; }
             .back-header { display: none; }
+            .credit-banner { display: none; }
+            .modal-overlay { display: none !important; }
         }
 
         @media (max-width: 600px) {
@@ -794,6 +937,8 @@
             .qty-btn { width: 18px; height: 18px; font-size: 0.7rem; }
             .footer-summary .grand-total { font-size: 1rem; padding: 4px 14px; }
             .back-header { flex-direction: column; gap: 8px; align-items: stretch; text-align: center; }
+            .credit-banner { flex-direction: column; text-align: center; }
+            .credit-banner .credits-info { justify-content: center; }
         }
 
         .tree-item, .btn-add-all, .btn-add-single, .action-btn, .remove-btn, .expand-all-btn, .qty-btn {
@@ -815,6 +960,25 @@
 </head>
 <body>
 <div class="app-container">
+    <!-- Credit Banner -->
+    <div class="credit-banner" id="creditBanner">
+        <div class="credits-info">
+            <div class="credit-item">
+                <span class="label">Free Credits</span>
+                <span class="value" id="freeCredits">0</span>
+            </div>
+            <div class="credit-item">
+                <span class="label">Paid Credits</span>
+                <span class="value" id="paidCredits">0</span>
+            </div>
+            <div class="credit-item">
+                <span class="label">Wallet Balance</span>
+                <span class="value" id="walletBalance">KES 0</span>
+            </div>
+        </div>
+        <button class="buy-btn" id="buyCreditsBtn">💰 Buy Credits</button>
+    </div>
+
     <!-- Back to App Button -->
     <div class="back-header">
         <a href="/">← Back to App</a>
@@ -933,9 +1097,52 @@
     </div>
 </div>
 
+<!-- Buy Credits Modal -->
+<div class="modal-overlay" id="creditModal">
+    <div class="modal">
+        <button class="close-btn" id="closeModalBtn">&times;</button>
+        <h2>💰 Buy Credits</h2>
+        <p style="color: #6a8aa8; font-size: 0.9rem;">Each calculation costs <strong>KES 5</strong>. Choose a package below:</p>
+        
+        <div class="package" data-amount="50" id="pkg50">
+            <div>
+                <div style="font-weight: 700;">10 Calculations</div>
+                <div class="desc">KES 50</div>
+            </div>
+            <div class="price">KES 50</div>
+        </div>
+        
+        <div class="package" data-amount="100" id="pkg100">
+            <div>
+                <div style="font-weight: 700;">25 Calculations</div>
+                <div class="desc">KES 100 (Save 20%)</div>
+            </div>
+            <div class="price">KES 100</div>
+        </div>
+        
+        <div class="package" data-amount="200" id="pkg200">
+            <div>
+                <div style="font-weight: 700;">50 Calculations</div>
+                <div class="desc">KES 200 (Save 33%)</div>
+            </div>
+            <div class="price">KES 200</div>
+        </div>
+        
+        <button class="pay-btn" id="payBtn">Pay with M-Pesa</button>
+        <p style="font-size: 0.75rem; color: #999; text-align: center; margin-top: 12px;">
+            Secure payment via Paystack
+        </p>
+    </div>
+</div>
+
 <input type="file" id="fileInput" accept=".json">
 
 <script>
+    // ============= CONFIG =============
+    const COST_PER_CALCULATION = 5;
+    const userEmail = '<%= user ? user.email : "" %>';
+    const isLoggedIn = !!userEmail;
+
     // ============= DATA =============
     const DATA = {
         substructure: {
@@ -1146,6 +1353,13 @@
     let updateTimeout = null;
     let searchTerm = '';
     let logoDataUrl = '';
+    let userCredits = {
+        freeCredits: { add_boq: 0 },
+        paidCredits: { add_boq: 0 },
+        walletBalance: 0,
+        verified: false
+    };
+    let selectedPackage = 50;
 
     // ============= DOM REFS =============
     const navTree = document.getElementById('nav-tree');
@@ -1159,6 +1373,158 @@
     const discountInput = document.getElementById('discountInput');
     const vatInput = document.getElementById('vatInput');
     const companyNameInput = document.getElementById('companyName');
+
+    // ============= CREDIT SYSTEM =============
+    async function fetchCredits() {
+        if (!isLoggedIn) {
+            document.getElementById('freeCredits').textContent = 'Login required';
+            document.getElementById('paidCredits').textContent = '-';
+            document.getElementById('walletBalance').textContent = 'KES 0';
+            return;
+        }
+
+        try {
+            const res = await fetch(`/api/check-credits/${encodeURIComponent(userEmail)}/add_boq`);
+            const data = await res.json();
+            
+            userCredits = {
+                freeCredits: { add_boq: data.freeCredits || 0 },
+                paidCredits: { add_boq: data.paidCredits || 0 },
+                walletBalance: data.walletBalance || 0,
+                verified: data.verified || false
+            };
+
+            document.getElementById('freeCredits').textContent = data.freeCredits || 0;
+            document.getElementById('paidCredits').textContent = data.paidCredits || 0;
+            document.getElementById('walletBalance').textContent = `KES ${data.walletBalance || 0}`;
+
+            if (!data.verified && isLoggedIn) {
+                alert('⚠️ Please verify your email to use BOQ features. Check your email for verification link.');
+            }
+        } catch (error) {
+            console.error('Error fetching credits:', error);
+        }
+    }
+
+    async function useCredit() {
+        if (!isLoggedIn) {
+            alert('Please login to use BOQ features.');
+            window.location.href = '/';
+            return false;
+        }
+
+        if (!userCredits.verified) {
+            alert('⚠️ Please verify your email first. Check your inbox for verification link.');
+            return false;
+        }
+
+        const totalCredits = (userCredits.freeCredits.add_boq || 0) + (userCredits.paidCredits.add_boq || 0);
+        if (totalCredits > 0) {
+            try {
+                const res = await fetch('/api/use-credit', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: userEmail, action: 'add_boq' })
+                });
+                const data = await res.json();
+                
+                if (data.success) {
+                    await fetchCredits();
+                    return true;
+                } else {
+                    alert(data.error || 'Failed to use credit. Please try again.');
+                    return false;
+                }
+            } catch (error) {
+                console.error('Error using credit:', error);
+                alert('Error processing credit. Please try again.');
+                return false;
+            }
+        } else if (userCredits.walletBalance >= COST_PER_CALCULATION) {
+            try {
+                const res = await fetch('/api/use-wallet', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: userEmail, action: 'add_boq' })
+                });
+                const data = await res.json();
+                
+                if (data.success) {
+                    await fetchCredits();
+                    return true;
+                } else {
+                    alert(data.message || 'Insufficient wallet balance. Please buy credits.');
+                    document.getElementById('buyCreditsBtn').click();
+                    return false;
+                }
+            } catch (error) {
+                console.error('Error using wallet:', error);
+                alert('Error processing payment. Please try again.');
+                return false;
+            }
+        } else {
+            alert('⚠️ No credits available. You need KES 5 per calculation.\n\nFree credits: ' + (userCredits.freeCredits.add_boq || 0) + 
+                  '\nPaid credits: ' + (userCredits.paidCredits.add_boq || 0) +
+                  '\nWallet balance: KES ' + (userCredits.walletBalance || 0));
+            document.getElementById('buyCreditsBtn').click();
+            return false;
+        }
+    }
+
+    // ============= BUY CREDITS =============
+    document.getElementById('buyCreditsBtn').addEventListener('click', function() {
+        if (!isLoggedIn) {
+            alert('Please login first.');
+            window.location.href = '/';
+            return;
+        }
+        document.getElementById('creditModal').classList.add('active');
+    });
+
+    document.getElementById('closeModalBtn').addEventListener('click', function() {
+        document.getElementById('creditModal').classList.remove('active');
+    });
+
+    document.querySelectorAll('.package').forEach(pkg => {
+        pkg.addEventListener('click', function() {
+            document.querySelectorAll('.package').forEach(p => p.classList.remove('selected'));
+            this.classList.add('selected');
+            selectedPackage = parseInt(this.dataset.amount);
+        });
+    });
+    document.getElementById('pkg50').classList.add('selected');
+
+    document.getElementById('payBtn').addEventListener('click', async function() {
+        if (!isLoggedIn) {
+            alert('Please login first.');
+            return;
+        }
+
+        this.disabled = true;
+        this.textContent = 'Processing...';
+
+        try {
+            const res = await fetch('/api/load-wallet', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email: userEmail, amount: selectedPackage })
+            });
+            const data = await res.json();
+
+            if (data.success && data.authorization_url) {
+                window.location.href = data.authorization_url;
+            } else {
+                alert('Payment initialization failed: ' + (data.error || 'Unknown error'));
+                this.disabled = false;
+                this.textContent = 'Pay with M-Pesa';
+            }
+        } catch (error) {
+            console.error('Payment error:', error);
+            alert('Payment failed. Please try again.');
+            this.disabled = false;
+            this.textContent = 'Pay with M-Pesa';
+        }
+    });
 
     // ============= LOCAL STORAGE =============
     function loadFromStorage() {
@@ -1261,10 +1627,9 @@
         return 'item_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6);
     }
 
-    // ============= DUPLICATE CHECK =============
     function isItemDuplicate(item, levels) {
-        return boqItems.some(existing => 
-            existing.title === item.title && 
+        return boqItems.some(existing =>
+            existing.title === item.title &&
             existing.levels.join() === levels.join()
         );
     }
@@ -1470,10 +1835,14 @@
         });
     }
 
-    // ============= ADD ITEMS WITH DUPLICATE CHECK =============
-    function addSingle(item, path) {
+    // ============= ADD ITEMS WITH CREDIT CHECK =============
+    async function addSingle(item, path) {
         let levels = getLevels(path);
-        
+
+        // Check credits before adding
+        const hasCredit = await useCredit();
+        if (!hasCredit) return;
+
         if (isItemDuplicate(item, levels)) {
             let existing = boqItems.find(i => i.title === item.title && i.levels.join() === levels.join());
             if (existing) {
@@ -1482,7 +1851,7 @@
             }
             return;
         }
-        
+
         boqItems.push({
             id: generateId(),
             title: item.title,
@@ -1496,11 +1865,16 @@
         renderTable();
     }
 
-    function addCategory(path) {
+    async function addCategory(path) {
         let node = getNode(path);
         if (!node) return;
+        
         let allItems = getAllItems(node);
         let levels = getLevels(path);
+
+        // Check credits before adding (one credit per category)
+        const hasCredit = await useCredit();
+        if (!hasCredit) return;
 
         allItems.forEach(item => {
             if (isItemDuplicate(item, levels)) {
@@ -1815,6 +2189,14 @@
     document.getElementById('projectDate').value = new Date().toISOString().split('T')[0];
 
     const loaded = loadFromStorage();
+    
+    // Fetch credits if logged in
+    if (isLoggedIn) {
+        fetchCredits();
+    } else {
+        document.getElementById('creditBanner').style.display = 'none';
+    }
+
     renderTree();
     renderTable();
 
@@ -1822,8 +2204,15 @@
         saveToStorage();
     }
 
+    // Refresh credits every 30 seconds
+    if (isLoggedIn) {
+        setInterval(fetchCredits, 30000);
+    }
+
     console.log('🏗️ BOQ Pro loaded successfully');
     console.log('📊 Items:', boqItems.length);
+    console.log('👤 Logged in:', isLoggedIn);
+    console.log('📧 Email:', userEmail);
 </script>
 </body>
 </html>

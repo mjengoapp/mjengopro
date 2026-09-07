@@ -2,7 +2,7 @@
   "users": [
     {
       "email": "ericsimiyunyongesa87@gmail.com",
-      "password": null,
+      "password": "fcd6dbf75201f6b24f6ca3f42787e3b2a859b3ddc53998f8dc2cbb578cf1313d",
       "verified": false,
       "verificationCode": "c4a8c56ba39c93d14a9bbb95e04bc4eb",
       "walletBalance": 0,
@@ -22,7 +22,9 @@
       },
       "totalFreeUsed": 0,
       "totalSpent": 0,
-      "createdAt": "2026-09-06T14:55:52.120Z"
+      "createdAt": "2026-09-06T14:55:52.120Z",
+      "resetToken": null,
+      "resetExpiry": null
     },
     {
       "email": "shikanishamjengo@gmail.com",
@@ -31,7 +33,7 @@
       "verificationCode": null,
       "walletBalance": 0,
       "freeCredits": {
-        "add_wall": 1,
+        "add_wall": 0,
         "add_concrete": 3,
         "add_plaster": 3,
         "add_painting": 3,
@@ -44,10 +46,19 @@
         "add_painting": 0,
         "add_tiling": 0
       },
-      "totalFreeUsed": 2,
+      "totalFreeUsed": 3,
       "totalSpent": 0,
       "createdAt": "2026-09-06T14:57:32.369Z"
     }
   ],
-  "transactions": []
+  "transactions": [
+    {
+      "reference": "rc7v8xpl3m",
+      "email": "shikanishamjengo@gmail.com",
+      "action": "wallet_load",
+      "amount": 50,
+      "status": "pending",
+      "createdAt": "2026-09-07T05:24:02.211Z"
+    }
+  ]
 }

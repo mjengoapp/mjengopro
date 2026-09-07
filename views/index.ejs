@@ -128,6 +128,18 @@
       margin-bottom: 12px;
       display: none;
     }
+    .forgot-link {
+      text-align: right;
+      margin-top: 6px;
+      font-size: 0.85rem;
+    }
+    .forgot-link a {
+      color: #2a7de1;
+      text-decoration: none;
+    }
+    .forgot-link a:hover {
+      text-decoration: underline;
+    }
 
     /* ===== APP STYLES (Logged In) ===== */
     .app-content { display: none; }
@@ -276,6 +288,19 @@
       transform: scale(0.95);
     }
 
+    /* Credit Status Badge */
+    .credit-status {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      margin-left: 8px;
+    }
+    .credit-status.free { background: #4caf50; color: white; }
+    .credit-status.paid { background: #ff9800; color: white; }
+    .credit-status.none { background: #f44336; color: white; }
+
     @media (max-width: 480px) {
       body { padding: 8px; }
       .card { padding: 14px 10px; border-radius: 20px; }
@@ -332,6 +357,9 @@
           <label>🔒 Password</label>
           <input type="password" id="loginPassword" placeholder="Enter your password" required minlength="6">
         </div>
+        <div class="forgot-link">
+          <a href="/forgot-password">Forgot password?</a>
+        </div>
         <button type="submit" class="btn-auth">Sign In</button>
       </form>
       <p style="text-align:center; margin-top:12px; font-size:0.8rem; color:#5a7a95;">
@@ -383,6 +411,7 @@
         <div class="wallet-info">
           <span>💰 <strong>Wallet:</strong> <span class="balance" id="walletBalance">KES 0.00</span></span>
           <span>🎁 <strong>Free Credits:</strong> <span id="freeCreditCount">0</span></span>
+          <span>💳 <strong>Paid Credits:</strong> <span id="paidCreditCount">0</span></span>
         </div>
         <button class="wallet-load-btn" onclick="App.loadWallet()">💳 Load Wallet</button>
       </div>
@@ -421,7 +450,7 @@
 
     <!-- All Tabs -->
     <div id="tab-walling" class="tab-content active"><div id="walling-container"></div><button class="add-item-btn-pay" id="add-walling-btn" onclick="App.addItemWithPayment('walling')">💰 Add Wall</button><div class="combined-total"><span class="label">🧱 Combined Walling Total</span><span class="amount" id="walling-combined-total">0.00 <small>currency</small></span></div></div>
-    <div id="tab-concrete" class="tab-content"><div id="concrete-container"></div><button class="add-item-btn-pay" id="add-concrete-btn" onclick="App.addItemWithPayment('concrete')">💰 Add Concrete</button><div class="combined-total"><span class="label">🧪 Combined Concrete Total</span><span class="amount" id="concrete-combined-total">0.00 <small>currency</small></span></div></div>
+    <div id="tab-concrete" class="tab-content"><div id="concrete-container"></div><button class="add-item-btn-pay" id="add-concrete-btn" onclick="App.addItemWithPayment('concrete')">💰 Add Concrete</button><div class="combined-total"><span class="label"> 🧪 Combined Concrete Total</span><span class="amount" id="concrete-combined-total">0.00 <small>currency</small></span></div></div>
     <div id="tab-plaster" class="tab-content"><div id="plaster-container"></div><button class="add-item-btn-pay" id="add-plaster-btn" onclick="App.addItemWithPayment('plaster')">💰 Add Plaster</button><div class="combined-total"><span class="label">🧹 Combined Plaster Total</span><span class="amount" id="plaster-combined-total">0.00 <small>currency</small></span></div></div>
     <div id="tab-painting" class="tab-content"><div id="painting-container"></div><button class="add-item-btn-pay" id="add-painting-btn" onclick="App.addItemWithPayment('painting')">💰 Add Painting Job</button><div class="combined-total"><span class="label">🎨 Combined Painting Total</span><span class="amount" id="painting-combined-total">0.00 <small>currency</small></span></div></div>
     <div id="tab-tiling" class="tab-content"><div id="tiling-container"></div><button class="add-item-btn-pay" id="add-tiling-btn" onclick="App.addItemWithPayment('tiling')">💰 Add Tiling Job</button><div class="combined-total"><span class="label">🪠 Combined Tiling Total</span><span class="amount" id="tiling-combined-total">0.00 <small>currency</small></span></div></div>
@@ -441,7 +470,7 @@
 
 <script>
 // ============================================================
-//  COMPLETE APP - 5 Calculators + Authentication
+//  COMPLETE APP - 5 Calculators + Authentication + Credits
 // ============================================================
 
 const App = {
@@ -470,7 +499,6 @@ const App = {
   // ===== INIT =====
   init() {
     this.setupAutoSelect();
-    // Check if user is already logged in (from session)
     this.checkSession();
   },
 
@@ -567,7 +595,6 @@ const App = {
 
       if (data.success) {
         this.showAuthSuccess('✅ Account created! Please check your email to verify.');
-        // Auto-login after registration
         this.userEmail = email;
         this.showApp();
         this.loadUserCredits();
@@ -710,6 +737,7 @@ const App = {
         walletSection.style.display = 'block';
         document.getElementById('walletBalance').textContent = `KES ${data.walletBalance.toFixed(2)}`;
         document.getElementById('freeCreditCount').textContent = data.freeCredits || 0;
+        document.getElementById('paidCreditCount').textContent = data.paidCredits || 0;
 
         this.updateAddButtonsWithWallet(data);
       }
@@ -891,27 +919,8 @@ const App = {
       }
     } catch (error) {
       console.error('Error checking wallet:', error);
-      this.initiatePayment(email, action, 5);
+      alert('An error occurred. Please try again.');
     }
-  },
-
-  initiatePayment(email, action, amount) {
-    fetch('/api/initialize-payment', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, action, amount })
-    })
-    .then(response => response.json())
-    .then(data => {
-      if (data.success) {
-        window.location.href = data.authorization_url;
-      } else {
-        alert('Payment failed: ' + (data.error || 'Unknown error'));
-      }
-    })
-    .catch(error => {
-      alert('Error: ' + error.message);
-    });
   },
 
   // ===== ADD ITEM =====
@@ -1494,15 +1503,12 @@ document.addEventListener('DOMContentLoaded', () => {
   App.init();
   const params = new URLSearchParams(window.location.search);
   const paymentStatus = params.get('payment');
-  const action = params.get('action');
   if (paymentStatus === 'success') {
-    const actionLabel = action ? action.replace('_', ' ').toUpperCase() : 'Action';
-    alert(`✅ Payment successful! You can now add ${actionLabel}.`);
+    alert('✅ Payment successful! Your wallet has been loaded.');
     window.history.replaceState({}, document.title, '/');
     setTimeout(() => App.loadUserCredits(), 500);
   } else if (paymentStatus === 'error') {
-    const message = params.get('message') || 'Payment failed';
-    alert(`❌ ${message}`);
+    alert('❌ Payment failed. Please try again.');
     window.history.replaceState({}, document.title, '/');
   }
 });

@@ -48,9 +48,9 @@ function initializeDataFile() {
         fs.mkdirSync(path.join(__dirname, 'data'));
     }
     if (!fs.existsSync(DATA_FILE)) {
-        fs.writeFileSync(DATA_FILE, JSON.stringify({ 
-            users: [], 
-            transactions: [] 
+        fs.writeFileSync(DATA_FILE, JSON.stringify({
+            users: [],
+            transactions: []
         }, null, 2));
     }
 }
@@ -92,22 +92,22 @@ app.get('/api/session', (req, res) => {
 app.post('/api/register', async (req, res) => {
     console.log('=== REGISTER REQUEST ===');
     console.log('Body:', req.body);
-    
+
     try {
         const { email, password } = req.body;
-        
+
         if (!email || !email.includes('@') || !password || password.length < 6) {
             return res.status(400).json({ error: 'Invalid email or password' });
         }
-        
+
         const data = readData();
         const existingUser = data.users.find(u => u.email === email);
         if (existingUser) {
             return res.status(400).json({ error: 'Email already registered' });
         }
-        
+
         const hashedPassword = crypto.createHash('sha256').update(password).digest('hex');
-        
+
         const newUser = {
             email: email,
             password: hashedPassword,
@@ -134,10 +134,10 @@ app.post('/api/register', async (req, res) => {
             totalSpent: 0,
             createdAt: new Date().toISOString()
         };
-        
+
         data.users.push(newUser);
         writeData(data);
-        
+
         req.session.user = { email };
         console.log('User registered:', email);
         res.json({ success: true });
@@ -151,27 +151,33 @@ app.post('/api/register', async (req, res) => {
 app.post('/api/login', async (req, res) => {
     console.log('=== LOGIN REQUEST ===');
     console.log('Body:', req.body);
-    
+
     try {
         const { email, password } = req.body;
-        
+
         if (!email || !password) {
             return res.status(400).json({ error: 'Email and password required' });
         }
-        
+
         const data = readData();
         const user = data.users.find(u => u.email === email);
-        
+
         if (!user) {
-            return res.status(401).json({ error: 'Invalid email or password' });
+            return res.status(401).json({ 
+                error: 'Invalid email or password',
+                email: email 
+            });
         }
-        
+
         const hashedPassword = crypto.createHash('sha256').update(password).digest('hex');
-        
+
         if (user.password !== hashedPassword) {
-            return res.status(401).json({ error: 'Invalid email or password' });
+            return res.status(401).json({ 
+                error: 'Invalid email or password',
+                email: email 
+            });
         }
-        
+
         req.session.user = { email };
         console.log('User logged in:', email);
         res.json({ success: true });
@@ -185,6 +191,252 @@ app.post('/api/login', async (req, res) => {
 app.post('/api/logout', (req, res) => {
     req.session.destroy();
     res.json({ success: true });
+});
+
+// ============================================================
+// PASSWORD RESET ROUTES
+// ============================================================
+
+// ===== FORGOT PASSWORD PAGE =====
+app.get('/forgot-password', (req, res) => {
+    const { email } = req.query;
+    res.render('forgot-password', { email: email || '' });
+});
+
+// ===== REQUEST PASSWORD RESET =====
+app.post('/api/forgot-password', async (req, res) => {
+    try {
+        const { email } = req.body;
+        
+        if (!email || !email.includes('@')) {
+            return res.status(400).json({ error: 'Valid email is required' });
+        }
+
+        const data = readData();
+        const user = data.users.find(u => u.email === email);
+        
+        if (!user) {
+            // Don't reveal if email exists or not (security)
+            return res.json({ 
+                success: true, 
+                message: 'If your email is registered, you will receive a password reset link.' 
+            });
+        }
+
+        // Generate reset token
+        const resetToken = crypto.randomBytes(32).toString('hex');
+        const resetExpiry = Date.now() + 3600000; // 1 hour
+
+        user.resetToken = resetToken;
+        user.resetExpiry = resetExpiry;
+        writeData(data);
+
+        // Send reset email
+        const baseUrl = process.env.BASE_URL || 'http://localhost:3000';
+        const resetLink = `${baseUrl}/reset-password?token=${resetToken}&email=${encodeURIComponent(email)}`;
+
+        await transporter.sendMail({
+            from: process.env.EMAIL_USER,
+            to: email,
+            subject: '🔑 Password Reset - Mjengo Pro',
+            html: `
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <style>
+                        body { font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; }
+                        .container { background: #f8faff; border-radius: 12px; padding: 30px; border: 1px solid #e6edf6; }
+                        .header { text-align: center; margin-bottom: 30px; }
+                        .header h1 { color: #1b3b5c; }
+                        .button { display: inline-block; background: #1b3b5c; color: white; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-weight: bold; margin: 20px 0; }
+                        .button:hover { background: #0d2d49; }
+                        .footer { margin-top: 30px; padding-top: 20px; border-top: 1px solid #e6edf6; color: #6a8aa8; font-size: 0.9rem; }
+                        .warning { background: #fff3cd; padding: 12px; border-radius: 8px; color: #856404; margin: 20px 0; }
+                    </style>
+                </head>
+                <body>
+                    <div class="container">
+                        <div class="header">
+                            <h1>🔑 Password Reset</h1>
+                            <p style="color: #6a8aa8;">We received a request to reset your password.</p>
+                        </div>
+                        
+                        <p>Hello <strong>${user.email}</strong>,</p>
+                        
+                        <p>Click the button below to reset your password. This link will expire in <strong>1 hour</strong>.</p>
+                        
+                        <div style="text-align: center;">
+                            <a href="${resetLink}" class="button">Reset Password</a>
+                        </div>
+                        
+                        <div class="warning">
+                            <strong>⚠️ Security Notice:</strong> If you didn't request this password reset, please ignore this email and ensure your account is secure.
+                        </div>
+                        
+                        <div class="footer">
+                            <p>This link will expire in 1 hour.</p>
+                            <p>If you're having trouble clicking the button, copy and paste this link into your browser:</p>
+                            <p style="word-break: break-all; font-size: 0.85rem; color: #2a7de1;">${resetLink}</p>
+                        </div>
+                    </div>
+                </body>
+                </html>
+            `
+        });
+
+        res.json({ 
+            success: true, 
+            message: 'If your email is registered, you will receive a password reset link.' 
+        });
+    } catch (error) {
+        console.error('Forgot password error:', error);
+        res.status(500).json({ error: 'Failed to process password reset request' });
+    }
+});
+
+// ===== VERIFY RESET TOKEN =====
+app.get('/api/verify-reset-token', (req, res) => {
+    try {
+        const { token, email } = req.query;
+        
+        if (!token || !email) {
+            return res.status(400).json({ valid: false, error: 'Invalid request' });
+        }
+
+        const data = readData();
+        const user = data.users.find(u => u.email === email);
+        
+        if (!user) {
+            return res.json({ valid: false, error: 'User not found' });
+        }
+
+        // Check if token exists and hasn't expired
+        if (!user.resetToken || user.resetToken !== token) {
+            return res.json({ valid: false, error: 'Invalid or expired token' });
+        }
+
+        if (user.resetExpiry < Date.now()) {
+            return res.json({ valid: false, error: 'Token has expired' });
+        }
+
+        res.json({ valid: true });
+    } catch (error) {
+        console.error('Verify token error:', error);
+        res.status(500).json({ valid: false, error: 'Verification failed' });
+    }
+});
+
+// ===== RESET PASSWORD =====
+app.post('/api/reset-password', async (req, res) => {
+    try {
+        const { email, token, newPassword } = req.body;
+        
+        if (!email || !token || !newPassword || newPassword.length < 6) {
+            return res.status(400).json({ error: 'Password must be at least 6 characters' });
+        }
+
+        const data = readData();
+        const user = data.users.find(u => u.email === email);
+        
+        if (!user) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+
+        // Validate token
+        if (!user.resetToken || user.resetToken !== token) {
+            return res.status(400).json({ error: 'Invalid or expired token' });
+        }
+
+        if (user.resetExpiry < Date.now()) {
+            return res.status(400).json({ error: 'Token has expired' });
+        }
+
+        // Update password
+        const hashedPassword = crypto.createHash('sha256').update(newPassword).digest('hex');
+        user.password = hashedPassword;
+        
+        // Clear reset token
+        user.resetToken = null;
+        user.resetExpiry = null;
+        
+        writeData(data);
+
+        // Send confirmation email
+        await transporter.sendMail({
+            from: process.env.EMAIL_USER,
+            to: email,
+            subject: '✅ Password Reset Successful - Mjengo Pro',
+            html: `
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <style>
+                        body { font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; }
+                        .container { background: #f8faff; border-radius: 12px; padding: 30px; border: 1px solid #e6edf6; }
+                        .header { text-align: center; margin-bottom: 30px; }
+                        .header h1 { color: #1b3b5c; }
+                        .success { background: #d4edda; padding: 15px; border-radius: 8px; color: #155724; }
+                        .button { display: inline-block; background: #1b3b5c; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: bold; }
+                    </style>
+                </head>
+                <body>
+                    <div class="container">
+                        <div class="header">
+                            <h1>✅ Password Reset Successful</h1>
+                        </div>
+                        
+                        <div class="success">
+                            <p>Your password has been successfully reset.</p>
+                            <p>You can now log in with your new password.</p>
+                        </div>
+                        
+                        <div style="text-align: center; margin: 30px 0;">
+                            <a href="${process.env.BASE_URL || 'http://localhost:3000'}" class="button">Go to App</a>
+                        </div>
+                        
+                        <p style="color: #6a8aa8; font-size: 0.9rem;">
+                            If you didn't reset your password, please contact support immediately.
+                        </p>
+                    </div>
+                </body>
+                </html>
+            `
+        });
+
+        res.json({ success: true, message: 'Password reset successfully' });
+    } catch (error) {
+        console.error('Reset password error:', error);
+        res.status(500).json({ error: 'Failed to reset password' });
+    }
+});
+
+// ===== RESET PASSWORD PAGE =====
+app.get('/reset-password', (req, res) => {
+    const { token, email } = req.query;
+    
+    if (!token || !email) {
+        return res.send(`
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <title>Invalid Reset Link</title>
+                <style>
+                    body { font-family: Arial; max-width: 500px; margin: 50px auto; padding: 20px; text-align: center; }
+                    .error { background: #f8d7da; padding: 20px; border-radius: 8px; border: 1px solid #f5c6cb; }
+                </style>
+            </head>
+            <body>
+                <div class="error">
+                    <h2>❌ Invalid Reset Link</h2>
+                    <p>The password reset link is invalid or incomplete.</p>
+                    <a href="/">Go to App</a>
+                </div>
+            </body>
+            </html>
+        `);
+    }
+
+    res.render('reset-password', { token, email });
 });
 
 // ============================================================
@@ -221,11 +473,11 @@ app.get('/verify', async (req, res) => {
     if (!code || !email) {
         return res.send('<h1>❌ Invalid Link</h1><a href="/">Go to App</a>');
     }
-    
+
     try {
         const data = readData();
         const user = data.users.find(u => u.email === email);
-        
+
         if (!user) return res.send('<h1>❌ User Not Found</h1><a href="/">Go to App</a>');
         if (user.verified) return res.send('<h1>✅ Already Verified</h1><a href="/">Go to App</a>');
         if (user.verificationCode === code) {
@@ -245,15 +497,15 @@ app.get('/auto-verify/:email', (req, res) => {
     const { email } = req.params;
     const data = readData();
     const user = data.users.find(u => u.email === email);
-    
+
     if (!user) {
         return res.send(`<h1>❌ User not found: ${email}</h1><a href="/">Go to App</a>`);
     }
-    
+
     user.verified = true;
     user.verificationCode = null;
     writeData(data);
-    
+
     res.send(`
         <!DOCTYPE html>
         <html>
@@ -296,16 +548,16 @@ app.post('/api/send-verification', async (req, res) => {
         if (!email || !email.includes('@')) {
             return res.status(400).json({ error: 'Invalid email' });
         }
-        
+
         const data = readData();
         let user = data.users.find(u => u.email === email);
-        
+
         if (user && user.verified) {
             return res.json({ message: 'Email already verified', verified: true, success: true });
         }
-        
+
         const verificationCode = crypto.randomBytes(16).toString('hex');
-        
+
         if (!user) {
             user = {
                 email: email,
@@ -338,10 +590,10 @@ app.post('/api/send-verification', async (req, res) => {
             user.verificationCode = verificationCode;
         }
         writeData(data);
-        
+
         const baseUrl = process.env.BASE_URL || 'http://localhost:3000';
         const verificationLink = `${baseUrl}/verify?code=${verificationCode}&email=${encodeURIComponent(email)}`;
-        
+
         await transporter.sendMail({
             from: process.env.EMAIL_USER,
             to: email,
@@ -353,7 +605,7 @@ app.post('/api/send-verification', async (req, res) => {
                 <p>This link expires in 24 hours.</p>
             `
         });
-        
+
         res.json({ success: true, message: 'Verification email sent' });
     } catch (error) {
         console.error('Send verification error:', error);
@@ -371,7 +623,7 @@ app.get('/api/check-credits/:email/:action', (req, res) => {
         const { email, action } = req.params;
         const data = readData();
         const user = data.users.find(u => u.email === email);
-        
+
         if (!user) {
             return res.json({
                 credits: 0,
@@ -383,11 +635,11 @@ app.get('/api/check-credits/:email/:action', (req, res) => {
                 walletBalance: 0
             });
         }
-        
+
         const freeCredits = user.freeCredits?.[action] || 0;
         const paidCredits = user.paidCredits?.[action] || 0;
         const walletBalance = user.walletBalance || 0;
-        
+
         res.json({
             credits: freeCredits + paidCredits,
             freeCredits,
@@ -408,31 +660,31 @@ app.post('/api/use-credit', async (req, res) => {
     try {
         const { email, action } = req.body;
         const COST_PER_CALCULATION = 5;
-        
+
         const data = readData();
         const user = data.users.find(u => u.email === email);
-        
+
         if (!user) return res.json({ success: false, error: 'User not found' });
         if (!user.verified) return res.json({ success: false, error: 'Email not verified' });
-        
+
         const freeCredits = user.freeCredits?.[action] || 0;
         if (freeCredits > 0) {
             user.freeCredits[action]--;
             user.totalFreeUsed = (user.totalFreeUsed || 0) + 1;
             writeData(data);
-            
+
             if (req.session.user && req.session.user.email === email) {
                 req.session.user = user;
             }
-            
+
             return res.json({ success: true, type: 'free' });
         }
-        
+
         const walletBalance = user.walletBalance || 0;
         if (walletBalance >= COST_PER_CALCULATION) {
             user.walletBalance = walletBalance - COST_PER_CALCULATION;
             user.totalSpent = (user.totalSpent || 0) + COST_PER_CALCULATION;
-            
+
             if (!user.paidCredits) {
                 user.paidCredits = {
                     add_wall: 0,
@@ -444,16 +696,16 @@ app.post('/api/use-credit', async (req, res) => {
                 };
             }
             user.paidCredits[action] = (user.paidCredits[action] || 0) + 1;
-            
+
             writeData(data);
-            
+
             if (req.session.user && req.session.user.email === email) {
                 req.session.user = user;
             }
-            
+
             return res.json({ success: true, type: 'wallet' });
         }
-        
+
         res.json({ success: false, error: 'No credits available' });
     } catch (error) {
         console.error('Error using credit:', error);
@@ -467,11 +719,11 @@ app.post('/api/load-wallet', async (req, res) => {
         const { email, amount } = req.body;
         if (!email) return res.status(400).json({ error: 'Email is required' });
         if (!amount || amount < 10) return res.status(400).json({ error: 'Minimum load amount is KES 10' });
-        
+
         const data = readData();
         const user = data.users.find(u => u.email === email);
         if (!user || !user.verified) return res.status(403).json({ error: 'Email not verified' });
-        
+
         const baseUrl = process.env.BASE_URL || 'http://localhost:3000';
         const response = await axios.post('https://api.paystack.co/transaction/initialize', {
             email: email,
@@ -484,7 +736,7 @@ app.post('/api/load-wallet', async (req, res) => {
                 'Content-Type': 'application/json'
             }
         });
-        
+
         if (response.data.status) {
             if (!data.transactions) data.transactions = [];
             data.transactions.push({
@@ -496,7 +748,7 @@ app.post('/api/load-wallet', async (req, res) => {
                 createdAt: new Date().toISOString()
             });
             writeData(data);
-            
+
             res.json({
                 success: true,
                 authorization_url: response.data.data.authorization_url,
@@ -517,12 +769,12 @@ app.get('/api/wallet-balance/:email', (req, res) => {
         const { email } = req.params;
         const data = readData();
         const user = data.users.find(u => u.email === email);
-        
+
         if (!user) return res.json({ error: 'User not found', verified: false });
-        
+
         const totalFree = Object.values(user.freeCredits || {}).reduce((a, b) => a + b, 0);
         const totalPaid = Object.values(user.paidCredits || {}).reduce((a, b) => a + b, 0);
-        
+
         res.json({
             email: user.email,
             walletBalance: user.walletBalance || 0,
@@ -541,22 +793,22 @@ app.post('/api/use-wallet', (req, res) => {
     try {
         const { email, action } = req.body;
         const COST_PER_CALCULATION = 5;
-        
+
         const data = readData();
         const user = data.users.find(u => u.email === email);
-        
+
         if (!user) return res.json({ success: false, error: 'User not found' });
         if (!user.verified) return res.json({ success: false, error: 'Email not verified' });
-        
+
         if (user.freeCredits && user.freeCredits[action] > 0) {
             user.freeCredits[action]--;
             user.totalFreeUsed = (user.totalFreeUsed || 0) + 1;
             writeData(data);
-            
+
             if (req.session.user && req.session.user.email === email) {
                 req.session.user = user;
             }
-            
+
             return res.json({
                 success: true,
                 remaining: user.freeCredits[action],
@@ -564,12 +816,12 @@ app.post('/api/use-wallet', (req, res) => {
                 message: 'Used free credit'
             });
         }
-        
+
         const currentBalance = user.walletBalance || 0;
         if (currentBalance >= COST_PER_CALCULATION) {
             user.walletBalance = currentBalance - COST_PER_CALCULATION;
             user.totalSpent = (user.totalSpent || 0) + COST_PER_CALCULATION;
-            
+
             if (!user.paidCredits) {
                 user.paidCredits = {
                     add_wall: 0,
@@ -581,13 +833,13 @@ app.post('/api/use-wallet', (req, res) => {
                 };
             }
             user.paidCredits[action] = (user.paidCredits[action] || 0) + 1;
-            
+
             writeData(data);
-            
+
             if (req.session.user && req.session.user.email === email) {
                 req.session.user = user;
             }
-            
+
             return res.json({
                 success: true,
                 remaining: user.walletBalance,
@@ -615,12 +867,12 @@ app.get('/api/user-summary/:email', (req, res) => {
         const { email } = req.params;
         const data = readData();
         const user = data.users.find(u => u.email === email);
-        
+
         if (!user) return res.json({ error: 'User not found' });
-        
+
         const totalFree = Object.values(user.freeCredits || {}).reduce((a, b) => a + b, 0);
         const totalPaid = Object.values(user.paidCredits || {}).reduce((a, b) => a + b, 0);
-        
+
         res.json({
             email: user.email,
             verified: user.verified,
@@ -649,24 +901,24 @@ app.get('/payment/verify', async (req, res) => {
     try {
         const { reference } = req.query;
         if (!reference) return res.redirect('/?payment=error');
-        
+
         const response = await axios.get(`https://api.paystack.co/transaction/verify/${reference}`, {
             headers: { 'Authorization': `Bearer ${process.env.PAYSTACK_SECRET_KEY}` }
         });
-        
+
         if (response.data.status && response.data.data.status === 'success') {
             const data = response.data.data;
             const email = data.metadata?.email || data.customer.email;
             const amount = data.amount / 100;
-            
+
             const jsonData = readData();
-            
+
             const transaction = jsonData.transactions.find(t => t.reference === reference);
             if (transaction) {
                 transaction.status = 'completed';
                 transaction.paidAt = new Date().toISOString();
             }
-            
+
             let user = jsonData.users.find(u => u.email === email);
             if (!user) {
                 user = {
@@ -695,13 +947,13 @@ app.get('/payment/verify', async (req, res) => {
                 };
                 jsonData.users.push(user);
             }
-            
+
             user.walletBalance = (user.walletBalance || 0) + amount;
             user.totalSpent = (user.totalSpent || 0) + amount;
-            
+
             writeData(jsonData);
             req.session.user = user;
-            
+
             res.redirect('/?payment=success');
         } else {
             res.redirect('/?payment=error');
@@ -725,15 +977,15 @@ app.post('/webhook/paystack', (req, res) => {
             const data = req.body.data;
             const email = data.metadata?.email || data.customer.email;
             const amount = data.amount / 100;
-            
+
             const jsonData = readData();
-            
+
             const transaction = jsonData.transactions.find(t => t.reference === data.reference);
             if (transaction) {
                 transaction.status = 'completed';
                 transaction.paidAt = new Date().toISOString();
             }
-            
+
             let user = jsonData.users.find(u => u.email === email);
             if (!user) {
                 user = {
@@ -762,10 +1014,10 @@ app.post('/webhook/paystack', (req, res) => {
                 };
                 jsonData.users.push(user);
             }
-            
+
             user.walletBalance = (user.walletBalance || 0) + amount;
             user.totalSpent = (user.totalSpent || 0) + amount;
-            
+
             writeData(jsonData);
         }
         res.sendStatus(200);
@@ -786,6 +1038,7 @@ if (require.main === module) {
         console.log(`🔑 Login: http://localhost:${PORT}/api/login`);
         console.log(`📋 BOQ: http://localhost:${PORT}/boq`);
         console.log(`✅ Auto-verify: http://localhost:${PORT}/auto-verify/your-email`);
+        console.log(`🔑 Forgot Password: http://localhost:${PORT}/forgot-password`);
         console.log('='.repeat(50));
     });
 }
